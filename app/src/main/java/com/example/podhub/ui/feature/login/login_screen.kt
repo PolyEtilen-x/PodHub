@@ -1,15 +1,18 @@
 package com.example.podhub.ui.feature.login
 
+import android.app.Activity.RESULT_CANCELED
+import android.app.Activity.RESULT_OK
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,33 +25,72 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.podhub.R
 import com.example.podhub.auth.GoogleAuthClient
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.podhub.models.UserModel
+import com.example.podhub.storage.DataStoreManager
 import com.example.podhub.ui.navigation.Routes
 import com.example.podhub.viewmodels.UserViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-
+import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel = viewModel()) {
-
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val dataStore = remember { DataStoreManager(context) }
 
-    val launcher  = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()){
-        GoogleAuthClient.doGoogleSignIn(
-            context = context,
-            scope = scope,
-            launcher = null,
-            login = {
-                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+    var pendingLogin by remember { mutableStateOf(false) }
+    var relaunchSignIn by remember { mutableStateOf(false) }
+
+    // ✅ Định nghĩa login callback riêng biệt
+    val loginCallback = {
+        val user = Firebase.auth.currentUser
+        if (user != null) {
+            val uid = user.uid
+            val name = user.displayName ?: ""
+            val email = user.email ?: ""
+            val photoUrl = user.photoUrl?.toString() ?: ""
+
+            scope.launch {
+                dataStore.saveUser(uid, name, email, photoUrl)
+                navController.navigate(Routes.FAVORITE_ARTIST)
             }
-        )
+            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+        }
     }
 
+    // ✅ Định nghĩa launcher callback → không gọi lại launcher ở đây
+    val activityResultHandler: (ActivityResult) -> Unit = rememberUpdatedState(newValue = { result: ActivityResult ->
+        if (pendingLogin && (result.resultCode == RESULT_OK || result.resultCode == RESULT_CANCELED)) {
+            pendingLogin = false
+            relaunchSignIn = true  // Trigger sign-in retry
+        }
+    }).value
+
+    // ✅ Launcher được khởi tạo độc lập
+    val launcher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+        onResult = activityResultHandler
+    )
+
+    // ✅ Gọi lại sign-in sau khi quay về từ Settings
+    if (relaunchSignIn) {
+        LaunchedEffect(Unit) {
+            relaunchSignIn = false
+            GoogleAuthClient.doGoogleSignIn(
+                context = context,
+                scope = scope,
+                launcher = launcher,
+                login = loginCallback,
+                onRequestCancelled = {
+                    Toast.makeText(context, "Request cancelled by PodHub", Toast.LENGTH_SHORT).show()
+                },
+                setPendingLogin = { pendingLogin = it }
+            )
+        }
+    }
+
+    // UI layout không đổi
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -64,17 +106,13 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // Logo PodHub
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "PodHub Logo",
                 contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.height(100.dp).fillMaxWidth()
             )
 
-            // Subtitle
             Text(
                 text = "Listen, Relax and Escape",
                 fontSize = 20.sp,
@@ -82,32 +120,18 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
                 color = Color.Black
             )
 
-            // Sign in button
             OutlinedButton(
                 onClick = {
                     GoogleAuthClient.doGoogleSignIn(
                         context = context,
                         scope = scope,
-                        launcher = null,
-                        login = {
-                            val user = Firebase.auth.currentUser
-                            if (user != null) {
-                                val userModel = UserModel(
-                                    uid = user.uid,
-                                    displayName = user.displayName,
-                                    email = user.email,
-                                    photoUrl = user.photoUrl.toString(),
-                                )
-                                userViewModel.currentUser = userModel
-                                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-                                navController.navigate(Routes.FAVORITE_ARTIST)
-                            } else {
-                                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        launcher = launcher,
+                        login = loginCallback,
+                        onRequestCancelled = {
+                            Toast.makeText(context, "Request cancelled by PodHub", Toast.LENGTH_SHORT).show()
+                        },
+                        setPendingLogin = { pendingLogin = it }
                     )
-
-
                 },
                 border = BorderStroke(2.dp, Color(0xFFFFC107)),
                 colors = ButtonDefaults.outlinedButtonColors(
@@ -115,12 +139,11 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
                     contentColor = Color(0xFFFFC107)
                 ),
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
+                modifier = Modifier.fillMaxWidth().height(50.dp)
             ) {
                 Text(text = "Sign in with Google", fontSize = 16.sp)
             }
         }
     }
 }
+

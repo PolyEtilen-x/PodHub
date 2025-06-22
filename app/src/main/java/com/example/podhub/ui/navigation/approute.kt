@@ -11,7 +11,6 @@ import com.example.podhub.ui.feature.artist.ArtistSelectionScreen
 import com.example.podhub.ui.feature.login.LoginScreen
 import com.example.podhub.ui.feature.home.HomeScreen
 import com.example.podhub.ui.feature.podcast.PodcastCategoryScreen
-import com.example.podhub.viewmodels.UserViewModel
 
 object Routes {
     const val INTRO1 = "intro1"
@@ -23,7 +22,7 @@ object Routes {
 }
 
 @Composable
-fun AppRouter(navController: NavHostController,    userViewModel: UserViewModel = viewModel()) {
+fun AppRouter(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Routes.INTRO1) {
         composable(Routes.INTRO1) {
             IntroScreen1(navController)
@@ -41,7 +40,7 @@ fun AppRouter(navController: NavHostController,    userViewModel: UserViewModel 
             PodcastCategoryScreen(navController)
         }
         composable(Routes.HOME) {
-            HomeScreen(navController = navController, userViewModel = userViewModel)
+            HomeScreen(navController)
         }
     }
 }
