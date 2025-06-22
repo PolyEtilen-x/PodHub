@@ -24,11 +24,16 @@ import com.example.podhub.R
 import com.example.podhub.auth.GoogleAuthClient
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.podhub.models.UserModel
 import com.example.podhub.ui.navigation.Routes
+import com.example.podhub.viewmodels.UserViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel = viewModel()) {
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -85,10 +90,23 @@ fun LoginScreen(navController: NavHostController) {
                         scope = scope,
                         launcher = null,
                         login = {
-                            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                            val user = Firebase.auth.currentUser
+                            if (user != null) {
+                                val userModel = UserModel(
+                                    uid = user.uid,
+                                    displayName = user.displayName,
+                                    email = user.email,
+                                    photoUrl = user.photoUrl.toString(),
+                                )
+                                userViewModel.currentUser = userModel
+                                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                                navController.navigate(Routes.FAVORITE_ARTIST)
+                            } else {
+                                Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     )
-                    navController.navigate(Routes.HOME)
+
 
                 },
                 border = BorderStroke(2.dp, Color(0xFFFFC107)),
