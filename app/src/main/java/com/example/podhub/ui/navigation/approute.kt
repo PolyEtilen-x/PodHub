@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.podhub.IntroScreen1
 import com.example.podhub.IntroScreen2
 import com.example.podhub.ui.feature.login.LoginScreen
+import com.example.podhub.ui.feature.home.HomeScreen
 
 object Routes {
     const val INTRO1 = "intro1"
@@ -27,8 +28,8 @@ fun AppRouter(navController: NavHostController) {
         composable(Routes.LOGIN) {
             LoginScreen(navController)
         }
-//        composable(Routes.HOME) {
-//            HomeScreen()
-//        }
+        composable(Routes.HOME) {
+            HomeScreen(navController)
+        }
     }
 }

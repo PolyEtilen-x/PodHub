@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">podhub</string>
+    <string name="app_name">PodHub</string>
+    <string name="web_client_id">334856022956-rimvu46tubfp9othn9of3mif8nap5r4h.apps.googleusercontent.com</string>
 </resources>

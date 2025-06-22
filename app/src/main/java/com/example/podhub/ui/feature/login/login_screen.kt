@@ -1,5 +1,7 @@
 package com.example.podhub.ui.feature.login
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -7,20 +9,41 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.podhub.R
+import com.example.podhub.auth.GoogleAuthClient
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.podhub.ui.navigation.Routes
+
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val launcher  = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()){
+        GoogleAuthClient.doGoogleSignIn(
+            context = context,
+            scope = scope,
+            launcher = null,
+            login = {
+                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -57,7 +80,16 @@ fun LoginScreen(navController: NavHostController) {
             // Sign in button
             OutlinedButton(
                 onClick = {
-                    // TODO: Google Sign In logic here
+                    GoogleAuthClient.doGoogleSignIn(
+                        context = context,
+                        scope = scope,
+                        launcher = null,
+                        login = {
+                            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                    navController.navigate(Routes.HOME)
+
                 },
                 border = BorderStroke(2.dp, Color(0xFFFFC107)),
                 colors = ButtonDefaults.outlinedButtonColors(
