@@ -56,3 +56,28 @@ fun PodcastItem(
     }
 }
 
+@Composable
+fun PodcastRow(podcasts: List<Podcast>) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .width(180.dp)
+    ) {
+        podcasts.forEach { podcast ->
+            PodcastItem(
+                podcast = podcast,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        // if podcast/2 la so le thi them 1 item
+        repeat(2 - podcasts.size) {
+            Spacer(modifier = Modifier.height(80.dp))
+        }
+    }
+}
+
+
+
+
+

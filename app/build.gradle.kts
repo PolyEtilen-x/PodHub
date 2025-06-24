@@ -64,6 +64,7 @@ dependencies {
     implementation (libs.androidx.navigation.compose)
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation ("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
 }
 

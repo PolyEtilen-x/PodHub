@@ -42,7 +42,6 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
     var pendingLogin by remember { mutableStateOf(false) }
     var relaunchSignIn by remember { mutableStateOf(false) }
 
-    // ✅ Định nghĩa login callback riêng biệt
     val loginCallback = {
         val user = Firebase.auth.currentUser
         if (user != null) {
@@ -59,7 +58,6 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
         }
     }
 
-    // ✅ Định nghĩa launcher callback → không gọi lại launcher ở đây
     val activityResultHandler: (ActivityResult) -> Unit = rememberUpdatedState(newValue = { result: ActivityResult ->
         if (pendingLogin && (result.resultCode == RESULT_OK || result.resultCode == RESULT_CANCELED)) {
             pendingLogin = false
@@ -67,13 +65,11 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
         }
     }).value
 
-    // ✅ Launcher được khởi tạo độc lập
     val launcher = rememberLauncherForActivityResult(
         contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
         onResult = activityResultHandler
     )
 
-    // ✅ Gọi lại sign-in sau khi quay về từ Settings
     if (relaunchSignIn) {
         LaunchedEffect(Unit) {
             relaunchSignIn = false
@@ -90,7 +86,6 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
         }
     }
 
-    // UI layout không đổi
     Box(
         modifier = Modifier
             .fillMaxSize()
