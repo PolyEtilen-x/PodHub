@@ -1,15 +1,20 @@
 package com.example.podhub.ui.navigation
 
 import androidx.compose.runtime.Composable
+import android.net.Uri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.podhub.IntroScreen1
 import com.example.podhub.IntroScreen2
+import com.example.podhub.data.PodcastResponse
 import com.example.podhub.ui.feature.artist.ArtistSelectionScreen
+import com.example.podhub.ui.feature.detail.PodcastDetailScreen
+import com.example.podhub.ui.feature.home.GenreDetailScreen
 import com.example.podhub.ui.feature.login.LoginScreen
 import com.example.podhub.ui.feature.home.HomeScreen
+import com.example.podhub.ui.feature.home.PodcastCategoriesScreen
 import com.example.podhub.ui.feature.podcast.PodcastCategoryScreen
 
 object Routes {
@@ -42,5 +47,19 @@ fun AppRouter(navController: NavHostController) {
         composable(Routes.HOME) {
             HomeScreen(navController)
         }
+        composable("genre/{genreName}") { backStackEntry ->
+            val genreName = Uri.decode(backStackEntry.arguments?.getString("genreName") ?: "")
+            GenreDetailScreen(genreName = genreName, navController = navController)
+        }
+        composable("podcast_detail/{podcastId}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("podcastId")?.toLongOrNull()
+            val podcast = PodcastResponse.podcastList.firstOrNull { it.trackId == id }
+            if (podcast != null) {
+                PodcastDetailScreen(navController = navController, podcast = podcast)
+            } else {}
+        }
+
+
+
     }
 }

@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.podhub.components.BottomNavigationBar
 import com.example.podhub.components.HomeHeader
-import com.example.podhub.data.SamplePodcasts
-import com.example.podhub.models.Podcast
+import com.example.podhub.data.PodcastResponse
+import com.example.podhub.models.PodcastResponseData
 import com.example.podhub.storage.DataStoreManager
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
@@ -28,9 +28,15 @@ import com.example.podhub.components.FilterHome
 import com.example.podhub.ui.components.PodcastRow
 import com.example.podhub.data.SampleArtists
 import com.example.podhub.models.Artist
+import com.example.podhub.ui.navigation.Routes
 
-fun LazyListScope.podcastSection(title: String, list: List<Podcast>) {
+fun LazyListScope.podcastSection(
+    title: String,
+    list: List<PodcastResponseData>,
+    onItemClick: (PodcastResponseData) -> Unit
+) {
     val columnChunks = list.chunked(2) // mỗi column có 2 dòng podcast
+
 
     item {
         Column(
@@ -48,7 +54,7 @@ fun LazyListScope.podcastSection(title: String, list: List<Podcast>) {
                 contentPadding = PaddingValues(horizontal = 4.dp)
             ) {
                 items(columnChunks) { columnPodcasts ->
-                    PodcastRow(podcasts = columnPodcasts)
+                    PodcastRow(podcasts = columnPodcasts, onItemClick = onItemClick)
                 }
             }
         }
@@ -79,21 +85,19 @@ fun LazyListScope.artistSection(title: String, list: List<Artist>) {
     }
 }
 
-
-
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
     val userData by dataStore.userData.collectAsState(initial = emptyMap())
     Log.d("DataStore", "userData = $userData")
+    val selectedFilter = remember { mutableStateOf(FilterHome.All) }
 
-    val recentPodcasts = SamplePodcasts.podcastList
-    val yourPlaylist = SamplePodcasts.podcastList //yourPlaylist
-    val suggestList = SamplePodcasts.podcastList //suggestList
-    val popularList = SamplePodcasts.podcastList //popularList
+    val recentPodcasts = PodcastResponse.podcastList.orEmpty()
+    val yourPlaylist = PodcastResponse.podcastList //yourPlaylist
+    val suggestList = PodcastResponse.podcastList //suggestList
+    val popularList = PodcastResponse.podcastList //popularList
     val artists = SampleArtists.artistList //artists
-
 
     Scaffold(
         topBar = {
@@ -126,18 +130,34 @@ fun HomeScreen(navController: NavHostController) {
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
                     onFilterSelected = { selected ->
-                        // TODO: xử lý chọn filter ở đây
+                        selectedFilter.value = selected
                     }
                 )
             }
 
-            podcastSection("Recent", recentPodcasts)
-            podcastSection("Your Playlist", yourPlaylist)
-            podcastSection("Suggest for you", suggestList)
-            podcastSection("Popular Podcasts", popularList)
-            artistSection("Top Artists", artists)
+            val onPodcastClick: (PodcastResponseData) -> Unit = { podcast ->
+                navController.navigate("podcast_detail/${podcast.trackId}")
+            }
+
+            when (selectedFilter.value) {
+                FilterHome.All -> {
+                    podcastSection("Gần đây", recentPodcasts, onPodcastClick)
+                    podcastSection("Danh sách phát", yourPlaylist, onPodcastClick)
+                    podcastSection("Đề xuất", suggestList, onPodcastClick)
+                    podcastSection("Podcast phổ biến", popularList, onPodcastClick)
+                    artistSection("Nghệ sĩ nổi bật", artists, )
+                }
+
+                FilterHome.Podcasts -> {
+                    item {
+                        PodcastCategoriesScreen(navController)
+                    }
+                }
+
+                FilterHome.Artists -> {
+                    artistSection("Top Artists", artists)
+                }
+            }
         }
-
     }
-
 }

@@ -24,8 +24,6 @@ import coil.request.ImageRequest
 import androidx.compose.ui.platform.LocalContext
 import com.example.podhub.R
 import com.example.podhub.models.Artist
-import com.example.podhub.models.Podcast
-import com.example.podhub.ui.components.PodcastItem
 import kotlin.collections.forEach
 
 @Composable

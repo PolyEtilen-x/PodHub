@@ -1,5 +1,6 @@
 package com.example.podhub.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -17,11 +18,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.podhub.R
-import com.example.podhub.models.Podcast
+import com.example.podhub.models.PodcastResponseData
 
 @Composable
 fun PodcastItem(
-    podcast: Podcast,
+    podcast: PodcastResponseData,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -33,7 +34,7 @@ fun PodcastItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(podcast.imageUrl)
+                    .data(podcast.artworkUrl100)
                     .crossfade(true)
                     .placeholder(com.example.podhub.R.drawable.avatar_default)
                     .error(R.drawable.avatar_default)
@@ -47,8 +48,8 @@ fun PodcastItem(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = podcast.title,
-                fontSize = 16.sp,
+                text = podcast.trackName,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
@@ -57,7 +58,7 @@ fun PodcastItem(
 }
 
 @Composable
-fun PodcastRow(podcasts: List<Podcast>) {
+fun PodcastRow(podcasts: List<PodcastResponseData>, onItemClick: (PodcastResponseData) -> Unit) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
@@ -66,7 +67,10 @@ fun PodcastRow(podcasts: List<Podcast>) {
         podcasts.forEach { podcast ->
             PodcastItem(
                 podcast = podcast,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onItemClick(podcast) }
+
             )
         }
 

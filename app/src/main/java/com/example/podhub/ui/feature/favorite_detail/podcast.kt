@@ -22,15 +22,15 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.podhub.R
-import com.example.podhub.data.SamplePodcasts
-import com.example.podhub.models.Podcast
+import com.example.podhub.models.PodcastResponseData
+import com.example.podhub.data.PodcastResponse
 import com.example.podhub.ui.components.PodcastItem
 import com.example.podhub.ui.navigation.Routes
 
 @Composable
 fun PodcastCategoryScreen(navController: NavHostController) {
     var searchQuery by remember { mutableStateOf("") }
-    val podcasts = SamplePodcasts.podcastList
+    val podcasts = PodcastResponse.podcastList
     val chunkedPodcasts = podcasts.chunked(2)
 
 
