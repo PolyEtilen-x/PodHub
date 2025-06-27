@@ -1,6 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
-package com.example.podhub.ui.feature.detail
+package com.example.podhub.ui.feature.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -11,10 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +24,7 @@ import com.example.podhub.components.BottomNavigationBar
 import com.example.podhub.components.HomeHeader
 import com.example.podhub.models.PodcastResponseData
 import com.example.podhub.storage.DataStoreManager
+import com.example.podhub.ui.navigation.Routes
 
 @Composable
 fun PodcastDetailScreen(
@@ -94,46 +90,52 @@ fun PodcastDetailScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = podcast.trackName,
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFFFC533)
-                        )
-                        Text(
-                            text = "Podcaster: ${podcast.artistName}",
-                            fontSize = 16.sp,
-                            color = Color.Gray
-                        )
+                    Text(
+                        text = podcast.trackName,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFC533)
+                    )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Podcaster: ${podcast.artistName}",
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
 
-                        Button(
-                            onClick = { /* TODO: Handle play */ },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC533)),
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f)
-                                .height(48.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Play",
-                                tint = Color.White
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Phát", color = Color.White)
-                        }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            navController.currentBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("podcast", podcast)
+                            navController.navigate(Routes.PLAYER)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC533)),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .height(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = "Play",
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Phát", color = Color.White)
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Chương:",
+                        fontSize = 25.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFC533)
+                    )
                 }
-                Text(
-                    text = "Chương:",
-                    fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFFC533)
-                )
             }
 
             items(podcast.episodes) { episode ->
@@ -170,3 +172,4 @@ fun PodcastDetailScreen(
         }
     }
 }
+

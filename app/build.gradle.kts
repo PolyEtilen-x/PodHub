@@ -3,6 +3,10 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+
+    id("org.jetbrains.kotlin.kapt")
+    id("org.jetbrains.kotlin.plugin.parcelize")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -65,6 +69,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation ("androidx.datastore:datastore-preferences:1.1.7")
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
-
+    implementation ("androidx.media3:media3-exoplayer:1.7.1")
+    implementation ("androidx.media3:media3-ui:1.7.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.7.1")
+    implementation("com.google.android.exoplayer:exoplayer-dash:2.19.1")
+    implementation("com.google.dagger:hilt-android:2.56.2")
+    kapt("com.google.dagger:hilt-compiler:2.56.2")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
 }
 

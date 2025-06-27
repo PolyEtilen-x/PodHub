@@ -1,12 +1,6 @@
 package com.example.podhub.models
+import java.io.Serializable
 
-//data class Podcast(
-//    val id: String,
-//    val title: String,
-//    val author: String,
-//    val imageUrl: String,
-//    val audioUrl: String
-//)
 
 data class PodcastResponseData(
     val collectionId: Long,
@@ -19,11 +13,11 @@ data class PodcastResponseData(
     val feedUrl: String,
     val channelImage: String,
     val episodes: List<Episode>
-)
+) : Serializable
 
 data class Episode(
     val title: String,
     val description: String,
     val audioUrl: String,
     val image: String
-)
+) : Serializable
