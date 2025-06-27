@@ -26,6 +26,7 @@ import com.example.podhub.ui.feature.login.LoginScreen
 import com.example.podhub.ui.feature.home.HomeScreen
 import com.example.podhub.ui.feature.home.PlayerScreen
 import com.example.podhub.ui.feature.home.PodcastCategoriesScreen
+import com.example.podhub.ui.feature.library.LibraryPodcastsScreen
 import com.example.podhub.ui.feature.podcast.PodcastCategoryScreen
 import com.example.podhub.ui.feature.search.SearchScreen
 
@@ -40,6 +41,7 @@ object Routes {
     const val PODCAST_DETAIL = "podcast_detail"
     const val PLAYER = "player"
     const val SEARCH = "search"
+    const val LIBRARY = "library"
 }
 
 @Composable
@@ -95,6 +97,9 @@ fun AppRouter(navController: NavHostController) {
 
         composable(Routes.SEARCH) {
             SearchScreen(navController)
+        }
+        composable(Routes.LIBRARY) {
+            LibraryPodcastsScreen(navController)
         }
 
     }
