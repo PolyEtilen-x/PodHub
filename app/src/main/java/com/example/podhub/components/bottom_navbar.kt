@@ -20,12 +20,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 data class NavItem(
     val label: String,
     val icon: ImageVector,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
+    val route: String
 )
 
 @Composable
 fun BottomNavigationBar(
-    modifier: Modifier = Modifier,
+    currentRoute: String,
     onHomeClick: () -> Unit,
     onSearchClick: () -> Unit,
     onRoomClick: () -> Unit,
@@ -34,24 +35,21 @@ fun BottomNavigationBar(
     var selectedIndex by remember { mutableStateOf(0) }
 
     val items = listOf(
-        NavItem("Home", Icons.Filled.Home, onHomeClick),
-        NavItem("Search", Icons.Filled.Search, onSearchClick),
-        NavItem("Room", Icons.Filled.VideoCall, onRoomClick),
-        NavItem("Your Library", Icons.Filled.LibraryBooks, onLibraryClick)
+        NavItem("Home", Icons.Filled.Home, onHomeClick, route = "home"),
+        NavItem("Search", Icons.Filled.Search, onSearchClick, route = "search"),
+        NavItem("Room", Icons.Filled.VideoCall, onRoomClick, route = "room"),
+        NavItem("Your Library", Icons.Filled.LibraryBooks, onLibraryClick, route = "library")
     )
 
     NavigationBar(
-        modifier = modifier,
         containerColor = Color(0xFFFFC533),
         tonalElevation = 8.dp
     ) {
-        items.forEachIndexed { index, item ->
+        items.forEach { item ->
+            val isSelected = currentRoute == item.route
             NavigationBarItem(
-                selected = selectedIndex == index,
-                onClick = {
-                    selectedIndex = index
-                    item.onClick()
-                },
+                selected = isSelected,
+                onClick = item.onClick,
                 icon = {
                     Icon(
                         imageVector = item.icon,

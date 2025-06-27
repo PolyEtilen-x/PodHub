@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberAsyncImagePainter
 import com.example.podhub.R
 import com.example.podhub.components.BottomNavigationBar
@@ -33,6 +34,7 @@ import com.example.podhub.components.HomeHeader
 import com.example.podhub.data.PodcastResponse
 import com.example.podhub.models.PodcastResponseData
 import com.example.podhub.storage.DataStoreManager
+import com.example.podhub.ui.navigation.Routes
 
 @Composable
 fun GenreDetailScreen(
@@ -45,6 +47,8 @@ fun GenreDetailScreen(
     val podcasts = PodcastResponse.podcastList.orEmpty().filter {
         it.primaryGenreName.equals(genreName, ignoreCase = true)
     }
+    val navBackStackEntry = navController.currentBackStackEntryAsState().value
+    val currentRoute = navBackStackEntry?.destination?.route ?: ""
 
     val genreImageRes = when (genreName.lowercase()) {
         "comedy" -> R.drawable.comedy
@@ -102,7 +106,8 @@ fun GenreDetailScreen(
 
         bottomBar = {
             BottomNavigationBar(
-                onHomeClick = { /* navController.navigate("home") */ },
+                currentRoute = currentRoute,
+                onHomeClick = { navController.navigate("home") },
                 onSearchClick = { navController.navigate("search") },
                 onRoomClick = { navController.navigate("room") },
                 onLibraryClick = { navController.navigate("library") }

@@ -27,7 +27,7 @@ import com.example.podhub.ui.feature.home.HomeScreen
 import com.example.podhub.ui.feature.home.PlayerScreen
 import com.example.podhub.ui.feature.home.PodcastCategoriesScreen
 import com.example.podhub.ui.feature.podcast.PodcastCategoryScreen
-
+import com.example.podhub.ui.feature.search.SearchScreen
 
 
 object Routes {
@@ -39,6 +39,7 @@ object Routes {
     const val FAVORITE_PODCAST = "favorite_podcast"
     const val PODCAST_DETAIL = "podcast_detail"
     const val PLAYER = "player"
+    const val SEARCH = "search"
 }
 
 @Composable
@@ -91,6 +92,11 @@ fun AppRouter(navController: NavHostController) {
                 PlayerScreen(navController, podcast)
             }
         }
+
+        composable(Routes.SEARCH) {
+            SearchScreen(navController)
+        }
+
     }
 }
 

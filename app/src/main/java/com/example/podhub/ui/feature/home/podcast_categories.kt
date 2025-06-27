@@ -99,7 +99,6 @@ fun PodcastCategoriesScreen(
                     }
                 }
 
-                // Nếu hàng chỉ có 1 item, thêm Spacer để căn giữa
                 if (row.size < 2) {
                     Spacer(modifier = Modifier.weight(1f))
                 }

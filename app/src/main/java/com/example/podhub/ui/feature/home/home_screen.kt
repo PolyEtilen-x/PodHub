@@ -25,6 +25,7 @@ import com.example.podhub.ui.components.PodcastRow
 import com.example.podhub.ui.feature.home.PodcastCategoriesScreen
 import com.example.podhub.viewmodel.PlayerViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.podhub.ui.navigation.Routes
 
 @Composable
@@ -32,6 +33,8 @@ fun HomeScreen(navController: NavHostController) {
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
     val userData by dataStore.userData.collectAsState(initial = emptyMap())
+    val navBackStackEntry = navController.currentBackStackEntryAsState().value
+    val currentRoute = navBackStackEntry?.destination?.route ?: ""
 
     val selectedFilter = remember { mutableStateOf(FilterHome.All) }
 
@@ -50,6 +53,7 @@ fun HomeScreen(navController: NavHostController) {
         },
         bottomBar = {
             BottomNavigationBar(
+                currentRoute = currentRoute,
                 onHomeClick = { navController.navigate("home") },
                 onSearchClick = { navController.navigate("search") },
                 onRoomClick = { navController.navigate("room") },

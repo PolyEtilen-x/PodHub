@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberAsyncImagePainter
 import com.example.podhub.components.BottomNavigationBar
 import com.example.podhub.components.HomeHeader
@@ -34,6 +35,8 @@ fun PodcastDetailScreen(
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
     val userData by dataStore.userData.collectAsState(initial = emptyMap())
+    val navBackStackEntry = navController.currentBackStackEntryAsState().value
+    val currentRoute = navBackStackEntry?.destination?.route ?: ""
 
     Scaffold(
         topBar = {
@@ -60,8 +63,9 @@ fun PodcastDetailScreen(
         },
         bottomBar = {
             BottomNavigationBar(
+                currentRoute = currentRoute,
                 onHomeClick = { navController.navigate("home") },
-                onSearchClick = { navController.navigate("search") },
+                onSearchClick = { navController.navigate("search")},
                 onRoomClick = { navController.navigate("room") },
                 onLibraryClick = { navController.navigate("library") }
             )
