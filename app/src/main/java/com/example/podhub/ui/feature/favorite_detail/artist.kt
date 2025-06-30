@@ -20,15 +20,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.podhub.R
-import com.example.podhub.data.SampleArtists
 import com.example.podhub.components.ArtistItem
 import com.example.podhub.ui.navigation.Routes
+import com.example.podhub.utils.ArtistItemShimmer
+
+import com.example.podhub.viewmodels.ArtistViewModel
 
 @Composable
-fun ArtistSelectionScreen(navController: NavHostController) {
+fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: ArtistViewModel) {
     var searchQuery by remember { mutableStateOf("") }
 
-    val artists = SampleArtists.artistList
+    val artists by artistViewModel.artists.collectAsState()
+    val isLoading by artistViewModel.isLoading.collectAsState()
 
     Column(
         modifier = Modifier
@@ -63,8 +66,7 @@ fun ArtistSelectionScreen(navController: NavHostController) {
             onValueChange = { searchQuery = it },
             placeholder = { Text("Search") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color(0xFFFFC107),
@@ -80,11 +82,19 @@ fun ArtistSelectionScreen(navController: NavHostController) {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.weight(1f)
         ) {
-            items(artists) { artist ->
-                ArtistItem(
-                    name = artist.name,
-                    imageUrl = artist.imageUrl
-                )
+            if (isLoading) {
+                // Show shimmer loading items
+                items(12) { // Show 12 shimmer items (4 rows × 3 columns)
+                    ArtistItemShimmer()
+                }
+            } else {
+                // Show actual artist items
+                items(artists) { artist ->
+                    ArtistItem(
+                        name = artist.name,
+                        imageUrl = artist.avatar
+                    )
+                }
             }
         }
 
