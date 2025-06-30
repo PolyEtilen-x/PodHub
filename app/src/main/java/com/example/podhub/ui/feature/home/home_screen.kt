@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -40,7 +41,7 @@ fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentRoute = navBackStackEntry?.destination?.route ?: ""
 
-    val selectedFilter = remember { mutableStateOf(FilterHome.All) }
+    val selectedFilter = rememberSaveable { mutableStateOf(FilterHome.All) }
 
     val recentPodcasts = PodcastResponse.podcastList.orEmpty()
     val yourPlaylist = PodcastResponse.podcastList
@@ -79,9 +80,8 @@ fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    onFilterSelected = { selected ->
-                        selectedFilter.value = selected
-                    }
+                    selectedFilter = selectedFilter.value,
+                    onFilterSelected = { selected -> selectedFilter.value = selected }
                 )
             }
 

@@ -20,52 +20,41 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun FilterBar(
     modifier: Modifier = Modifier,
+    selectedFilter: FilterHome,
     onFilterSelected: (FilterHome) -> Unit
 ) {
-    var selected by remember { mutableStateOf(FilterHome.All) }
-
     val filters = listOf(FilterHome.All, FilterHome.Podcasts, FilterHome.Artists)
 
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically
     ) {
         filters.forEach { filter ->
-            val isSelected = filter == selected
+            val isSelected = filter == selectedFilter
 
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (isSelected) Color(0xFFFFC533) else Color.White
-                    )
+                    .background(if (isSelected) Color(0xFFFFC533) else Color.White)
                     .border(
                         width = 1.dp,
                         color = Color(0xFFFFC533),
                         shape = RoundedCornerShape(12.dp)
                     )
-                    .clickable {
-                        selected = filter
-                        onFilterSelected(filter)
-                    }
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-
-
+                    .clickable { onFilterSelected(filter) }
+                    .padding(horizontal = 15.dp, vertical = 8.dp)
             ) {
                 Text(
                     text = filter.title,
                     color = if (isSelected) Color.White else Color(0xFFFFC533),
-                    fontSize = 20.sp,
+                    fontSize = 19.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
     }
 }
-
 
 enum class FilterHome(val title: String) {
     All("All"),
