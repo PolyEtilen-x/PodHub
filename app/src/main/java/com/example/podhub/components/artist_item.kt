@@ -1,5 +1,6 @@
 package com.example.podhub.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -27,13 +29,21 @@ import com.example.podhub.models.Artist
 import kotlin.collections.forEach
 
 @Composable
-fun ArtistItem(name: String, imageUrl: String) {
+fun ArtistItem(
+    name: String,
+    imageUrl: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     val context = LocalContext.current
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.wrapContentSize()
+        modifier = Modifier
+            .wrapContentSize()
+            .clickable(enabled = !isSelected) { onClick() }
+            .alpha(if (isSelected) 0.5f else 1f)
     ) {
         AsyncImage(
             model = ImageRequest.Builder(context)
@@ -56,6 +66,7 @@ fun ArtistItem(name: String, imageUrl: String) {
     }
 }
 
+
 @Composable
 fun ArtistRow(artist: List<Artist>) {
     Column(
@@ -66,7 +77,9 @@ fun ArtistRow(artist: List<Artist>) {
         artist.forEach { artist ->
             ArtistItem(
                 name = artist.name,
-                imageUrl = artist.avatar
+                imageUrl = artist.name,
+                isSelected = false,
+                onClick = {}
             )
         }
 

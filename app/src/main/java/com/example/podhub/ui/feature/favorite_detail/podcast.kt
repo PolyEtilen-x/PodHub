@@ -1,6 +1,5 @@
 package com.example.podhub.ui.feature.podcast
 
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,40 +12,38 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.podhub.R
 import com.example.podhub.models.PodcastResponseData
-import com.example.podhub.data.PodcastResponse
+import com.example.podhub.storage.SelectedPodcastStore
 import com.example.podhub.ui.components.PodcastItem
 import com.example.podhub.ui.navigation.Routes
 import com.example.podhub.utils.PodcastItemShimmer
-import com.example.podhub.utils.createShimmerBrush
-
 import com.example.podhub.viewmodels.PodcastViewModel
+import kotlinx.coroutines.launch
+import android.util.Log
 
 @Composable
-fun PodcastCategoryScreen(navController: NavHostController,podCastViewModel: PodcastViewModel) {
+fun PodcastCategoryScreen(navController: NavHostController, podCastViewModel: PodcastViewModel) {
     var searchQuery by remember { mutableStateOf("") }
-
-
     val podcasts by podCastViewModel.podcasts.collectAsState()
     val isLoading by podCastViewModel.isLoading.collectAsState()
-    val chunkedPodcasts = podcasts.chunked(2)
-
+    val selectedPodcasts = remember { mutableStateListOf<String>() }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val filteredPodcasts = podcasts.filter {
+        it.trackName?.contains(searchQuery, ignoreCase = true) == true
+    }
 
 
     Column(
@@ -66,7 +63,7 @@ fun PodcastCategoryScreen(navController: NavHostController,podCastViewModel: Pod
         )
 
         Text(
-            text = "Category of Podcast",
+            text = "Podcast yêu thích",
             fontSize = 26.sp,
             fontWeight = FontWeight.ExtraBold,
             color = Color(0xFFFFC533)
@@ -77,7 +74,7 @@ fun PodcastCategoryScreen(navController: NavHostController,podCastViewModel: Pod
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Search") },
+            placeholder = { Text("Tìm kiếm") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth(),
@@ -90,12 +87,13 @@ fun PodcastCategoryScreen(navController: NavHostController,podCastViewModel: Pod
         )
 
         LazyColumn(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (isLoading) {
-                // Show shimmer loading items
-                items(6) { // Show 6 shimmer rows (12 items total)
+                items(6) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -105,15 +103,24 @@ fun PodcastCategoryScreen(navController: NavHostController,podCastViewModel: Pod
                     }
                 }
             } else {
-                // Show actual podcast items
+                val chunkedPodcasts = filteredPodcasts.chunked(2)
+
                 items(chunkedPodcasts) { row ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         row.forEach { podcast ->
+                            val isSelected = selectedPodcasts.contains(podcast.trackName)
+
                             PodcastItem(
                                 podcast = podcast,
+                                isSelected = isSelected,
+                                onClick = {
+                                    if (!isSelected) {
+                                        selectedPodcasts.add(podcast.trackName ?: "")
+                                    }
+                                },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -126,9 +133,27 @@ fun PodcastCategoryScreen(navController: NavHostController,podCastViewModel: Pod
             }
         }
 
+
+        if (selectedPodcasts.isNotEmpty()) {
+            Text(
+                text = "Bạn đã chọn ${selectedPodcasts.size} podcast",
+                fontSize = 25.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFFFFC533),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 8.dp)
+            )
+        }
+
         Button(
             onClick = {
-                navController.navigate(Routes.HOME)
+                coroutineScope.launch {
+                    SelectedPodcastStore.saveSelectedPodcasts(context, selectedPodcasts.toSet())
+                    navController.navigate(Routes.HOME)
+                    Log.d("selectedPodcasts", selectedPodcasts.toString())
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -139,7 +164,7 @@ fun PodcastCategoryScreen(navController: NavHostController,podCastViewModel: Pod
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Text("START", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("BẮT ĐẦU", fontSize = 22.sp, fontWeight = FontWeight.Bold)
         }
     }
 }

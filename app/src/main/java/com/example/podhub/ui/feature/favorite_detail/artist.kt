@@ -23,15 +23,23 @@ import com.example.podhub.R
 import com.example.podhub.components.ArtistItem
 import com.example.podhub.ui.navigation.Routes
 import com.example.podhub.utils.ArtistItemShimmer
-
+import com.example.podhub.storage.SelectedArtistStore
 import com.example.podhub.viewmodels.ArtistViewModel
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
+import android.util.Log
+import androidx.compose.ui.Alignment
 
 @Composable
 fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: ArtistViewModel) {
     var searchQuery by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
     val artists by artistViewModel.artists.collectAsState()
     val isLoading by artistViewModel.isLoading.collectAsState()
+    val selectedArtists = remember { mutableStateListOf<String>() }
+    val coroutineScope = rememberCoroutineScope()
+
 
     Column(
         modifier = Modifier
@@ -52,7 +60,7 @@ fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: Art
 
         // Title
         Text(
-            text = "Artists you like",
+            text = "Podcaster bạn yêu thích",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFFFFC533)
@@ -64,7 +72,7 @@ fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: Art
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Search") },
+            placeholder = { Text("Tìm kiếm") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
@@ -83,24 +91,46 @@ fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: Art
             modifier = Modifier.weight(1f)
         ) {
             if (isLoading) {
-                // Show shimmer loading items
-                items(12) { // Show 12 shimmer items (4 rows × 3 columns)
+                items(12) {
                     ArtistItemShimmer()
                 }
             } else {
                 // Show actual artist items
                 items(artists) { artist ->
+                    val isSelected = selectedArtists.contains(artist.name)
                     ArtistItem(
                         name = artist.name,
-                        imageUrl = artist.avatar
+                        imageUrl = artist.avatar,
+                        isSelected = isSelected,
+                        onClick = {
+                            if (!isSelected) {
+                                selectedArtists.add(artist.name)
+                            }
+                        }
                     )
                 }
+
             }
+        }
+        if (selectedArtists.isNotEmpty()) {
+            Text(
+                text = "Bạn đã chọn ${selectedArtists.size} podcaster",
+                fontSize = 25.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFFFFC533),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+            )
         }
 
         Button(
             onClick = {
-                navController.navigate(Routes.FAVORITE_PODCAST)
+                coroutineScope.launch {
+                    SelectedArtistStore.saveSelectedArtists(context, selectedArtists.toSet())
+                    navController.navigate(Routes.FAVORITE_PODCAST)
+                    Log.d("selectedArtists", selectedArtists.toString())
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -111,7 +141,7 @@ fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: Art
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Text(text = "NEXT", fontWeight = FontWeight.Bold, fontSize = 30.sp)
+            Text(text = "TIẾP TỤC", fontWeight = FontWeight.Bold, fontSize = 30.sp)
         }
     }
 }

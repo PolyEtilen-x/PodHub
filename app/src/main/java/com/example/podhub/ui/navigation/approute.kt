@@ -34,7 +34,7 @@ import com.example.podhub.ui.feature.home.PodcastCategoriesScreen
 import com.example.podhub.ui.feature.library.LibraryPodcastsScreen
 import com.example.podhub.ui.feature.login.LoginViewModel
 import com.example.podhub.ui.feature.podcast.PodcastCategoryScreen
-import com.example.podhub.ui.feature.room.RoomListScreen
+//import com.example.podhub.ui.feature.room.RoomListScreen
 import com.example.podhub.ui.feature.search.SearchScreen
 import com.example.podhub.viewmodels.ArtistViewModel
 import com.example.podhub.viewmodels.PodcastViewModel
@@ -130,9 +130,9 @@ fun AppRouter(navController: NavHostController) {
         composable(Routes.LIBRARY) {
             LibraryPodcastsScreen(navController)
         }
-        composable(Routes.ROOM) {
-            RoomListScreen(navController)
-        }
+//        composable(Routes.ROOM) {
+//            RoomListScreen(navController)
+//        }
 
     }
 }
