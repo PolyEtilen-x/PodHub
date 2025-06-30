@@ -2,6 +2,7 @@
 
 package com.example.podhub.ui.feature.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -35,20 +37,23 @@ import com.example.podhub.data.PodcastResponse
 import com.example.podhub.models.PodcastResponseData
 import com.example.podhub.storage.DataStoreManager
 import com.example.podhub.ui.navigation.Routes
+import com.example.podhub.viewmodels.PodcastViewModel
+import com.example.podhub.utils.ShimmerPodcastRow
 
 @Composable
 fun GenreDetailScreen(
     genreName: String,
-    navController: NavHostController
+    navController: NavHostController,
+    podcastViewModel: PodcastViewModel
 ) {
+
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
     val userData by dataStore.userData.collectAsState(initial = emptyMap())
-    val podcasts = PodcastResponse.podcastList.orEmpty().filter {
-        it.primaryGenreName.equals(genreName, ignoreCase = true)
-    }
+    val podcasts by podcastViewModel.categoryPodcasts.collectAsState()
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentRoute = navBackStackEntry?.destination?.route ?: ""
+    val isLoading by podcastViewModel.isLoading.collectAsState()
 
     val genreImageRes = when (genreName.lowercase()) {
         "comedy" -> R.drawable.comedy
@@ -78,6 +83,10 @@ fun GenreDetailScreen(
         "sport" -> "Thể Thao"
         "true crime" -> "Tội Phạm"
         else ->   "Podcast"
+    }
+    LaunchedEffect(genreName) {
+        Log.d("gerne",genreName)
+        podcastViewModel.fetchPodcastsByCategory(genreName)
     }
 
     Scaffold(
@@ -153,41 +162,49 @@ fun GenreDetailScreen(
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
-
-            items(podcasts) { podcast ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable {
-                            navController.navigate("podcast_detail/${podcast.trackId}")
-                        },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(podcast.artworkUrl100),
-                        contentDescription = podcast.trackName,
+            if (isLoading) {
+                items(6) {
+                    ShimmerPodcastRow()
+                }
+            }else{
+                items(podcasts) { podcast ->
+                    Row(
                         modifier = Modifier
-                            .size(56.dp)
-                            .padding(end = 12.dp)
-                    )
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                navController.navigate("podcast_detail/${podcast.trackId}")
+                            },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(podcast.artworkUrl100),
+                            contentDescription = podcast.trackName,
+                            modifier = Modifier
+                                .size(56.dp)
+                                .padding(end = 12.dp)
+                        )
 
-                    Column {
-                        Text(
-                            text = podcast.collectionName,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 17.sp,
-                            color = Color(0xFFFFC533)
-                        )
-                        Text(
-                            text = podcast.artistName,
-                            fontSize = 13.sp,
-                            color = Color.Gray,
-                            fontWeight = FontWeight.W500
-                        )
+                        Column {
+                            Text(
+                                text = podcast.collectionName.toString(),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 17.sp,
+                                color = Color(0xFFFFC533)
+                            )
+                            Text(
+                                text = podcast.artistName.toString(),
+                                fontSize = 13.sp,
+                                color = Color.Gray,
+                                fontWeight = FontWeight.W500
+                            )
+                        }
                     }
                 }
+
             }
+
+
         }
     }
 }

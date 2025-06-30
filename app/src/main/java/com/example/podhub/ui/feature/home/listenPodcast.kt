@@ -31,7 +31,7 @@ fun PlayerScreen(
     podcast: PodcastResponseData
 ) {
     val context = LocalContext.current
-    val episode = podcast.episodes.firstOrNull()
+    val episode = podcast.episodes?.firstOrNull()
 
     // --- ExoPlayer setup ---
     val exoPlayer = remember {
@@ -94,8 +94,8 @@ fun PlayerScreen(
             contentScale = ContentScale.Crop
         )
 
-        Text(podcast.trackName, fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFC533))
-        Text(podcast.artistName, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+        Text(podcast.trackName.toString(), fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFC533))
+        Text(podcast.artistName.toString(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
 
         episode?.title?.let {
             Text(

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +35,8 @@ import com.example.podhub.ui.feature.library.LibraryPodcastsScreen
 import com.example.podhub.ui.feature.login.LoginViewModel
 import com.example.podhub.ui.feature.podcast.PodcastCategoryScreen
 import com.example.podhub.ui.feature.search.SearchScreen
+import com.example.podhub.viewmodels.ArtistViewModel
+import com.example.podhub.viewmodels.PodcastViewModel
 
 
 object Routes {
@@ -51,7 +54,24 @@ object Routes {
 
 @Composable
 fun AppRouter(navController: NavHostController) {
+    val artistViewModel: ArtistViewModel = viewModel(factory = viewModelFactory {
+        initializer {
+
+            ArtistViewModel()
+        }
+    })
+    val podCastViewModel: PodcastViewModel = viewModel(factory = viewModelFactory {
+        initializer {
+            PodcastViewModel()
+        }
+    })
+    LaunchedEffect(Unit) {
+        podCastViewModel.fetchPodcasts("comedy",10)
+        artistViewModel.fetchAllArtists()
+    }
+
     NavHost(navController = navController, startDestination = Routes.INTRO1) {
+
 
 
         composable(Routes.INTRO1) {
@@ -67,20 +87,20 @@ fun AppRouter(navController: NavHostController) {
         }
 
         composable(Routes.FAVORITE_ARTIST) {
-            ArtistSelectionScreen(navController)
+            ArtistSelectionScreen(navController,artistViewModel)
         }
 
         composable(Routes.FAVORITE_PODCAST) {
-            PodcastCategoryScreen(navController)
+            PodcastCategoryScreen(navController,podCastViewModel)
         }
 
         composable(Routes.HOME) {
-            HomeScreen(navController)
+            HomeScreen(navController,artistViewModel,podCastViewModel)
         }
 
         composable("genre/{genreName}") { backStackEntry ->
             val genreName = Uri.decode(backStackEntry.arguments?.getString("genreName") ?: "")
-            GenreDetailScreen(genreName = genreName, navController = navController)
+            GenreDetailScreen(genreName = genreName, navController = navController,podCastViewModel)
         }
 
         composable(Routes.PODCAST_DETAIL) {

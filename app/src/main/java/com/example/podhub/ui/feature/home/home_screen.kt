@@ -16,7 +16,6 @@ import com.example.podhub.components.HomeHeader
 import com.example.podhub.components.FilterBar
 import com.example.podhub.components.FilterHome
 import com.example.podhub.data.PodcastResponse
-import com.example.podhub.data.SampleArtists
 import com.example.podhub.models.Artist
 import com.example.podhub.models.PodcastResponseData
 import com.example.podhub.storage.DataStoreManager
@@ -25,11 +24,16 @@ import com.example.podhub.ui.components.PodcastRow
 import com.example.podhub.ui.feature.home.PodcastCategoriesScreen
 import com.example.podhub.viewmodel.PlayerViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.podhub.ui.navigation.Routes
+import com.example.podhub.viewmodels.ArtistViewModel
+import com.example.podhub.viewmodels.PodcastViewModel
 
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel,podcastViewModel: PodcastViewModel) {
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
     val userData by dataStore.userData.collectAsState(initial = emptyMap())
@@ -40,9 +44,10 @@ fun HomeScreen(navController: NavHostController) {
 
     val recentPodcasts = PodcastResponse.podcastList.orEmpty()
     val yourPlaylist = PodcastResponse.podcastList
-    val suggestList = PodcastResponse.podcastList
+    val suggestList by podcastViewModel.podcasts.collectAsState()
     val popularList = PodcastResponse.podcastList
-    val artists = SampleArtists.artistList
+    val artists by artistViewModel.artists.collectAsState()
+
 
     Scaffold(
         topBar = {

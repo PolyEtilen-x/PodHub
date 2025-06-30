@@ -52,12 +52,12 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         val episodes = podcast.episodes
 
         val nextIndex = if (_shuffleMode.value) {
-            Random.nextInt(episodes.size)
+            episodes?.let { Random.nextInt(it.size) }
         } else {
-            (_currentEpisodeIndex.value + 1).coerceAtMost(episodes.lastIndex)
+            episodes?.let { (_currentEpisodeIndex.value + 1).coerceAtMost(it.lastIndex) }
         }
 
-        _currentEpisodeIndex.value = nextIndex
+        _currentEpisodeIndex.value = nextIndex!!
         playEpisodeAt(nextIndex)
     }
 
@@ -83,16 +83,18 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private fun playEpisodeAt(index: Int) {
         val podcast = _currentPodcast.value ?: return
         val episodes = podcast.episodes
-        if (index in episodes.indices) {
-            val episode = episodes[index]
-            val mediaItem = MediaItem.fromUri(episode.audioUrl)
-            exoPlayer.setMediaItem(mediaItem)
-            exoPlayer.prepare()
-            exoPlayer.play()
-            _isPlaying.value = true
+        episodes?.indices?.let {
+            if (index in it  ) {
+                val episode = episodes?.get(index)
+                val mediaItem = MediaItem.fromUri(episode?.audioUrl.toString())
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.prepare()
+                exoPlayer.play()
+                _isPlaying.value = true
 
-            println("Playing episode: ${episode.title}")
+                println("Playing episode: ${episode?.title}")
 
+            }
         }
     }
 

@@ -38,8 +38,8 @@ fun SearchScreen(navController: NavHostController) {
     val results = remember(query) {
         if (query.isBlank()) emptyList()
         else allPodcasts.filter {
-            it.trackName.contains(query, ignoreCase = true) ||
-                    it.artistName.contains(query, ignoreCase = true)
+            it.trackName?.contains(query, ignoreCase = true) == true ||
+                    it.artistName?.contains(query, ignoreCase = true) == true
         }
     }
 
@@ -133,7 +133,7 @@ fun SearchResultItem(
 
         Column {
             Text(
-                podcast.trackName,
+                podcast.trackName.toString(),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFFFC533)

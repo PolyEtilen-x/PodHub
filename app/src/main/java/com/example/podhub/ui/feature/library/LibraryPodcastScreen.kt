@@ -144,7 +144,7 @@ fun PodcastLibraryItem(podcast: PodcastResponseData) {
         )
 
         Text(
-            text = podcast.trackName,
+            text = podcast.trackName.toString(),
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             color = Color.Black,
