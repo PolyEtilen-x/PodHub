@@ -66,7 +66,7 @@ fun ArtistRow(artist: List<Artist>) {
         artist.forEach { artist ->
             ArtistItem(
                 name = artist.name,
-                imageUrl = artist.imageUrl
+                imageUrl = artist.avatar
             )
         }
 

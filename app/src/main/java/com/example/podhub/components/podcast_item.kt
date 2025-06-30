@@ -48,7 +48,7 @@ fun PodcastItem(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = podcast.trackName,
+                text = podcast.trackName.toString(),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White

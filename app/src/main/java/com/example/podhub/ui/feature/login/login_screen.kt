@@ -32,6 +32,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 
 @Composable
 fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel = viewModel()) {
@@ -41,6 +43,14 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
 
     var pendingLogin by remember { mutableStateOf(false) }
     var relaunchSignIn by remember { mutableStateOf(false) }
+
+
+    val loginViewModel: LoginViewModel = viewModel(factory = viewModelFactory {
+        initializer {
+            val dataStoreManager = DataStoreManager(context)
+            LoginViewModel(dataStoreManager)
+        }
+    })
 
     val loginCallback = {
         val user = Firebase.auth.currentUser
@@ -52,6 +62,7 @@ fun LoginScreen(navController: NavHostController, userViewModel: UserViewModel =
 
             scope.launch {
                 dataStore.saveUser(uid, name, email, photoUrl)
+                loginViewModel.login(uuid = uid)
                 navController.navigate(Routes.FAVORITE_ARTIST)
             }
             Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
