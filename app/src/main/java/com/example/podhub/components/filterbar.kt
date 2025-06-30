@@ -70,5 +70,5 @@ fun FilterBar(
 enum class FilterHome(val title: String) {
     All("All"),
     Podcasts("Podcasts"),
-    Artists("Artists")
+    Artists("Podcasters")
 }

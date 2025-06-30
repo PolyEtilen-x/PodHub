@@ -173,7 +173,11 @@ fun GenreDetailScreen(
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .clickable {
-                                navController.navigate("podcast_detail/${podcast.trackId}")
+                                navController.currentBackStackEntry
+                                    ?.savedStateHandle
+                                    ?.set("podcast", podcast)
+
+                                navController.navigate(Routes.PODCAST_DETAIL)
                             },
                         verticalAlignment = Alignment.CenterVertically
                     ) {

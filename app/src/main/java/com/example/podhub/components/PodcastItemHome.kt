@@ -1,6 +1,5 @@
 package com.example.podhub.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,7 +8,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -23,17 +21,15 @@ import com.example.podhub.R
 import com.example.podhub.models.PodcastResponseData
 
 @Composable
-fun PodcastItem(
+fun PodcastItemBasic(
     podcast: PodcastResponseData,
-    isSelected: Boolean = false,
-    onClick: () -> Unit = {},
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier
             .height(60.dp)
-            .clickable(enabled = !isSelected) { onClick() }
-            .alpha(if (isSelected) 0.5f else 1f),
+            .clickable { onClick() },
         color = Color(0xFFFFC533),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -62,35 +58,3 @@ fun PodcastItem(
         }
     }
 }
-
-
-
-@Composable
-fun PodcastRow(
-    podcasts: List<PodcastResponseData>,
-    onItemClick: (PodcastResponseData) -> Unit
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.width(180.dp)
-    ) {
-        podcasts.forEach { podcast ->
-            PodcastItemBasic(
-                podcast = podcast,
-                onClick = { onItemClick(podcast) },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        repeat(2 - podcasts.size) {
-            Spacer(modifier = Modifier.height(80.dp))
-        }
-    }
-}
-
-
-
-
-
-
-
