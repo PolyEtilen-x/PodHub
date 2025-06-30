@@ -95,7 +95,7 @@ fun PodcastDetailScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = podcast.trackName,
+                        text = podcast.trackName.toString(),
                         fontSize = 30.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFFFC533)
@@ -142,7 +142,7 @@ fun PodcastDetailScreen(
                 }
             }
 
-            items(podcast.episodes) { episode ->
+            items(podcast.episodes ?: emptyList()) { episode ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -159,13 +159,13 @@ fun PodcastDetailScreen(
                     )
                     Column {
                         Text(
-                            text = episode.title,
+                            text = episode.title.toString(),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFFFC533)
                         )
                         Text(
-                            text = episode.description,
+                            text = episode.description.toString(),
                             fontSize = 13.sp,
                             color = Color.Gray,
                             maxLines = 2
