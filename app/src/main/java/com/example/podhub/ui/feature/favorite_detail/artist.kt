@@ -29,9 +29,10 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 import android.util.Log
 import androidx.compose.ui.Alignment
+import com.example.podhub.viewmodels.FavouriteViewModel
 
 @Composable
-fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: ArtistViewModel) {
+fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: ArtistViewModel,favouriteViewModel: FavouriteViewModel) {
     var searchQuery by remember { mutableStateOf("") }
 
     val context = LocalContext.current

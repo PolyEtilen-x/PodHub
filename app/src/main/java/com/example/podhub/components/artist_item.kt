@@ -77,7 +77,7 @@ fun ArtistRow(artist: List<Artist>) {
         artist.forEach { artist ->
             ArtistItem(
                 name = artist.name,
-                imageUrl = artist.name,
+                imageUrl = artist.avatar,
                 isSelected = false,
                 onClick = {}
             )
