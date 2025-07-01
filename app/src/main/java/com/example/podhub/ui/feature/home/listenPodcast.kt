@@ -23,20 +23,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.podhub.models.Episode
+import com.example.podhub.viewmodels.PodcastViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun PlayerScreen(
     navController: NavHostController,
-    podcast: PodcastResponseData
+    podcastViewModel: PodcastViewModel,
+    initialEpisodeIndex: Int,
+    imageUrl: String,
+    artistName: String
 ) {
     val context = LocalContext.current
-    val episode = podcast.episodes?.firstOrNull()
+    val episodes by podcastViewModel.episodes.collectAsState()
 
+    // State for current episode index
+    var currentEpisodeIndex by remember { mutableStateOf(initialEpisodeIndex) }
+
+    // Get current episode safely
+    val currentEpisode = episodes.getOrNull(currentEpisodeIndex)
+
+    var isPlaying by remember { mutableStateOf(false) }
+    var sliderPosition by remember { mutableStateOf(0f) }
     // --- ExoPlayer setup ---
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build()
     }
+    suspend fun trackPlayback() {
+
+        while (!exoPlayer.isPlaying) {
+            delay(100)
+        }
+
+        while (exoPlayer.isPlaying) {
+            val position = exoPlayer.currentPosition
+            val duration = exoPlayer.duration.takeIf { it > 0 } ?: 1
+            sliderPosition = (position.toFloat() / duration).coerceIn(0f, 1f)
+            delay(500)
+        }
+    }
+
+
 
     DisposableEffect(Unit) {
         onDispose {
@@ -44,27 +72,34 @@ fun PlayerScreen(
         }
     }
 
-    // --- Prepare media once ---
-    LaunchedEffect(episode) {
-        if (episode != null) {
+    LaunchedEffect(currentEpisodeIndex) {
+        currentEpisode?.let { episode ->
+            // Stop current playback
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+
+            // Reset player state variables
+            sliderPosition = 0f
+            isPlaying = false
+
+            // Assuming Episode has an audioUrl property
             val mediaItem = MediaItem.fromUri(Uri.parse(episode.audioUrl))
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
             exoPlayer.play()
+
+
+            isPlaying = true
+
+
+            trackPlayback()
         }
     }
 
-    var isPlaying by remember { mutableStateOf(true) }
-    var sliderPosition by remember { mutableStateOf(0f) }
 
-    // --- Update slider ---
+
     LaunchedEffect(isPlaying) {
-        while (isPlaying) {
-            val position = exoPlayer.currentPosition
-            val duration = exoPlayer.duration.takeIf { it > 0 } ?: 1
-            sliderPosition = (position.toFloat() / duration).coerceIn(0f, 1f)
-            delay(500)
-        }
+       trackPlayback()
     }
 
     Column(
@@ -85,7 +120,9 @@ fun PlayerScreen(
         }
 
         Image(
-            painter = rememberAsyncImagePainter(episode?.image ?: podcast.channelImage),
+            painter = rememberAsyncImagePainter(
+                imageUrl
+            ),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -94,10 +131,20 @@ fun PlayerScreen(
             contentScale = ContentScale.Crop
         )
 
-        Text(podcast.trackName.toString(), fontSize = 30.sp, fontWeight = FontWeight.Bold, color = Color(0xFFFFC533))
-        Text(podcast.artistName.toString(), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+        Text(
+            text = currentEpisode?.title ?: "Unknown Podcast",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFFFC533)
+        )
+        Text(
+            text = artistName ?: "Unknown Artist",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Gray
+        )
 
-        episode?.title?.let {
+        currentEpisode?.title?.let {
             Text(
                 text = it,
                 fontSize = 17.sp,
@@ -113,7 +160,8 @@ fun PlayerScreen(
         Slider(
             value = sliderPosition,
             onValueChange = { ratio ->
-                exoPlayer.seekTo((ratio * exoPlayer.duration).toLong())
+                val seekPosition = (ratio * exoPlayer.duration).toLong()
+                exoPlayer.seekTo(seekPosition)
                 sliderPosition = ratio
             },
             modifier = Modifier.fillMaxWidth(),
@@ -128,7 +176,7 @@ fun PlayerScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(formatTime(exoPlayer.currentPosition), color = Color.Gray)
-            Text(formatTime(exoPlayer.duration), color = Color.Gray)
+            Text(formatTime(if (exoPlayer.duration > 0) exoPlayer.duration else 0), color = Color.Gray)
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -141,8 +189,20 @@ fun PlayerScreen(
                 Icon(Icons.Default.Shuffle, contentDescription = "Shuffle", tint = Color.Gray)
             }
 
-            IconButton(onClick = { /* Previous not handled */ }) {
-                Icon(Icons.Default.FastRewind, contentDescription = "Previous")
+            IconButton(
+                onClick = {
+                    // Go to previous episode
+                    if (currentEpisodeIndex > 0) {
+                        currentEpisodeIndex--
+                    }
+                },
+                enabled = currentEpisodeIndex > 0 // Disable if at first episode
+            ) {
+                Icon(
+                    Icons.Default.FastRewind,
+                    contentDescription = "Previous",
+                    tint = if (currentEpisodeIndex > 0) Color(0xFFFFC533) else Color.Gray
+                )
             }
 
             IconButton(
@@ -167,8 +227,20 @@ fun PlayerScreen(
                 )
             }
 
-            IconButton(onClick = { /* Next not handled */ }) {
-                Icon(Icons.Default.FastForward, contentDescription = "Next")
+            IconButton(
+                onClick = {
+                    // Go to next episode
+                    if (currentEpisodeIndex < episodes.size - 1) {
+                        currentEpisodeIndex++
+                    }
+                },
+                enabled = currentEpisodeIndex < episodes.size - 1 // Disable if at last episode
+            ) {
+                Icon(
+                    Icons.Default.FastForward,
+                    contentDescription = "Next",
+                    tint = if (currentEpisodeIndex < episodes.size - 1) Color(0xFFFFC533) else Color.Gray
+                )
             }
 
             IconButton(onClick = { /* Repeat not handled */ }) {
@@ -178,7 +250,7 @@ fun PlayerScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text("LYRICS", color = Color.Gray, fontSize = 12.sp)
+        Text("DESCRIPTION", color = Color.Gray, fontSize = 12.sp)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -186,7 +258,7 @@ fun PlayerScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = episode?.description ?: "Không có lời mô tả.",
+                text = currentEpisode?.description ?: "Không có lời mô tả.",
                 color = Color.White
             )
         }

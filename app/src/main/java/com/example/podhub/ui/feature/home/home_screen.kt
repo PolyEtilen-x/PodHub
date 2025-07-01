@@ -29,12 +29,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.podhub.components.ArtistRow
 import com.example.podhub.ui.navigation.Routes
 import com.example.podhub.viewmodels.ArtistViewModel
+import com.example.podhub.viewmodels.FavouriteViewModel
 import com.example.podhub.viewmodels.PodcastViewModel
 
 @Composable
-fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel,podcastViewModel: PodcastViewModel) {
+fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel,podcastViewModel: PodcastViewModel,favouriteViewModel: FavouriteViewModel) {
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
     val userData by dataStore.userData.collectAsState(initial = emptyMap())
@@ -48,6 +50,10 @@ fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel
     val suggestList by podcastViewModel.podcasts.collectAsState()
     val popularList = PodcastResponse.podcastList
     val artists by artistViewModel.artists.collectAsState()
+    val suggestedPodcast by favouriteViewModel.suggestedPodcasts.collectAsState()
+    LaunchedEffect(Unit) {
+        favouriteViewModel.loadSuggestedPodcasts("112233")
+    }
 
 
     Scaffold(
@@ -97,13 +103,13 @@ fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel
                 FilterHome.All -> {
                     podcastSection("Gần đây", recentPodcasts, onPodcastClick)
                     podcastSection("Danh sách phát", yourPlaylist, onPodcastClick)
-                    podcastSection("Đề xuất", suggestList, onPodcastClick)
+                    podcastSection("Đề xuất", suggestedPodcast, onPodcastClick)
                     podcastSection("Podcast phổ biến", popularList, onPodcastClick)
                     artistSection("Nghệ sĩ nổi bật", artists)
                 }
                 FilterHome.Podcasts -> {
                     item {
-                        PodcastCategoriesScreen(navController)
+                        PodcastCategoriesScreen(navController,podcastViewModel)
                     }
                 }
                 FilterHome.Artists -> {
@@ -152,7 +158,7 @@ fun LazyListScope.artistSection(title: String, list: List<Artist>) {
             )
             LazyRow {
                 items(artistColumns) { columnArtists ->
-                    com.example.podhub.components.ArtistRow(columnArtists)
+                    ArtistRow(columnArtists)
                 }
             }
         }

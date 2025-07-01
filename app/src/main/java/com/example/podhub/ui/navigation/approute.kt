@@ -37,6 +37,7 @@ import com.example.podhub.ui.feature.podcast.PodcastCategoryScreen
 //import com.example.podhub.ui.feature.room.RoomListScreen
 import com.example.podhub.ui.feature.search.SearchScreen
 import com.example.podhub.viewmodels.ArtistViewModel
+import com.example.podhub.viewmodels.FavouriteViewModel
 import com.example.podhub.viewmodels.PodcastViewModel
 
 
@@ -67,6 +68,12 @@ fun AppRouter(navController: NavHostController) {
             PodcastViewModel()
         }
     })
+    val favouriteViewModel: FavouriteViewModel = viewModel(factory = viewModelFactory {
+        initializer {
+            FavouriteViewModel()
+        }
+    })
+
     LaunchedEffect(Unit) {
         podCastViewModel.fetchPodcasts("comedy",10)
         artistViewModel.fetchAllArtists()
@@ -89,15 +96,15 @@ fun AppRouter(navController: NavHostController) {
         }
 
         composable(Routes.FAVORITE_ARTIST) {
-            ArtistSelectionScreen(navController,artistViewModel)
+            ArtistSelectionScreen(navController,artistViewModel,favouriteViewModel)
         }
 
         composable(Routes.FAVORITE_PODCAST) {
-            PodcastCategoryScreen(navController,podCastViewModel)
+            PodcastCategoryScreen(navController,podCastViewModel,favouriteViewModel)
         }
 
         composable(Routes.HOME) {
-            HomeScreen(navController,artistViewModel,podCastViewModel)
+            HomeScreen(navController,artistViewModel,podCastViewModel,favouriteViewModel)
         }
 
         composable("genre/{genreName}") { backStackEntry ->
@@ -111,18 +118,25 @@ fun AppRouter(navController: NavHostController) {
                 ?.savedStateHandle
                 ?.get<PodcastResponseData>("podcast")
             if (podcast != null) {
-                PodcastDetailScreen(navController, podcast)
+                PodcastDetailScreen(navController, podcast,podCastViewModel,favouriteViewModel)
             }
         }
         composable(Routes.PLAYER) {
-            val podcast = navController
-                .previousBackStackEntry
-                ?.savedStateHandle
-                ?.get<PodcastResponseData>("podcast")
-            if (podcast != null) {
-                PlayerScreen(navController, podcast)
-            }
+            val savedStateHandle = navController.previousBackStackEntry?.savedStateHandle
+
+            val initialEpisodeIndex = savedStateHandle?.get<Int>("initialEpisodeIndex") ?: 0
+            val imageUrl = savedStateHandle?.get<String>("imageUrl") ?: ""
+            val artistName = savedStateHandle?.get<String>("artistName") ?: ""
+
+            PlayerScreen(
+                navController = navController,
+                podcastViewModel = podCastViewModel,
+                initialEpisodeIndex = initialEpisodeIndex,
+                imageUrl = imageUrl,
+                artistName = artistName
+            )
         }
+
 
         composable(Routes.SEARCH) {
             SearchScreen(navController)

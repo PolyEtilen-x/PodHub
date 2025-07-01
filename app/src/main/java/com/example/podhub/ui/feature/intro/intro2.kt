@@ -47,7 +47,7 @@ fun IntroScreen2(navController: NavHostController) {
 
         FloatingActionButton(
             onClick = {
-                navController.navigate(Routes.LOGIN)
+                navController.navigate(Routes.HOME)
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)

@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(private val dataStoreManager: DataStoreManager) : ViewModel() {
 
-    private val _loginMessage = MutableStateFlow<String?>(null)
-    val loginMessage: StateFlow<String?> get() = _loginMessage
+    private val _loginMessage = MutableStateFlow<Boolean>(false)
+    val loginMessage: StateFlow<Boolean?> get() = _loginMessage
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
@@ -30,7 +30,7 @@ class LoginViewModel(private val dataStoreManager: DataStoreManager) : ViewModel
             try {
                 val response = RetrofitInstance.userService.loginUser(LoginRequest = Login(uuid))
                 if (response.isSuccessful) {
-                    _loginMessage.value = response.body()?.message
+                    _loginMessage.value = response.body()?.message!!
                     Log.d("login",loginMessage.toString())
                 } else {
                     _errorMessage.value = response.errorBody()?.string() ?: "Unknown error"

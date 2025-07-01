@@ -84,10 +84,6 @@ fun GenreDetailScreen(
         "true crime" -> "Tội Phạm"
         else ->   "Podcast"
     }
-    LaunchedEffect(genreName) {
-        Log.d("gerne",genreName)
-        podcastViewModel.fetchPodcastsByCategory(genreName)
-    }
 
     Scaffold(
         topBar = {
