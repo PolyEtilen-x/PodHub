@@ -107,7 +107,9 @@ fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel
                     }
                 }
                 FilterHome.Artists -> {
-                    artistSection("Top Artists", artists)
+                    item {
+                        PodcasterScreen(navController = navController, artists = artists)
+                    }
                 }
             }
         }
@@ -141,7 +143,7 @@ fun LazyListScope.podcastSection(
 }
 
 fun LazyListScope.artistSection(title: String, list: List<Artist>) {
-    val artistColumns = list.chunked(2)
+    val artistColumns = list.chunked(1)
     item {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(

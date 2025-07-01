@@ -13,7 +13,8 @@ import kotlin.jvm.java
 
 
 object RetrofitInstance {
-    private const val SECOND_URL = "http://192.168.0.100:3000"
+//    private const val SECOND_URL = "http://192.168.0.100:3000"
+    private const val SECOND_URL = "http://192.168.139.1:3000"
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)

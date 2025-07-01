@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -79,6 +81,15 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("com.google.accompanist:accompanist-placeholder-material:0.34.0")
+    implementation ("com.github.dhaval2404:imagepicker:1.7.5")
+    implementation ("io.coil-kt:coil-compose:2.7.0")
+    implementation("com.cloudinary:cloudinary-android:2.3.1")
+
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+
+
+
 
 
 
