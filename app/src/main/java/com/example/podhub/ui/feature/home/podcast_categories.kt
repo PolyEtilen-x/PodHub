@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.podhub.R
+import com.example.podhub.viewmodels.PodcastViewModel
 
 data class PodcastCategory(
     val name: String,
@@ -39,7 +40,8 @@ val podcastCategories = listOf(
 
 @Composable
 fun PodcastCategoriesScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    podcastViewModel: PodcastViewModel
 ) {
     val categories = podcastCategories.chunked(2)
     val modifier: Modifier = Modifier
@@ -63,6 +65,7 @@ fun PodcastCategoriesScreen(
                             .weight(1f)
                             .wrapContentHeight()
                             .clickable {
+                                podcastViewModel.fetchPodcastsByCategory(category.name)
                                 navController.navigate("genre/${Uri.encode(category.name)}")
                             },
                         horizontalAlignment = Alignment.CenterHorizontally

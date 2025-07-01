@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "334856022956",
+    "project_id": "podhub-fa7de",
+    "storage_bucket": "podhub-fa7de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334856022956:android:d70cd71c6cdcd6977ee809",
+        "android_client_info": {
+          "package_name": "com.example.mobile_learn"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "334856022956-rimvu46tubfp9othn9of3mif8nap5r4h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4U8liM8fcSVOBYnaTSGcoRbYgj4EQr8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "334856022956-rimvu46tubfp9othn9of3mif8nap5r4h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "334856022956-7uorg6obhg8pm3t0753umo1a3pqi2te5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mobileLearn"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334856022956:android:063553dfb0212d297ee809",
+        "android_client_info": {
+          "package_name": "com.example.podhub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "334856022956-9ghg9sab5quhj3qkdva3brk2rj95i82l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.podhub",
+            "certificate_hash": "88ef5e6239b2aee217a30b2f8eaa364a115304da"
+          }
+        },
+        {
+          "client_id": "334856022956-rimvu46tubfp9othn9of3mif8nap5r4h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4U8liM8fcSVOBYnaTSGcoRbYgj4EQr8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "334856022956-rimvu46tubfp9othn9of3mif8nap5r4h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "334856022956-7uorg6obhg8pm3t0753umo1a3pqi2te5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.mobileLearn"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

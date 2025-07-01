@@ -34,7 +34,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     fun setPodcast(podcast: PodcastResponseData) {
         _currentPodcast.value = podcast
         _currentEpisodeIndex.value = 0
-        playEpisodeAt(0) // ✅ chính xác và an toàn
+        playEpisodeAt(0)
     }
 
     fun togglePlayPause() {

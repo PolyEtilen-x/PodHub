@@ -1,6 +1,7 @@
 package com.example.podhub.Retrofit
 
 import com.example.podhub.Service.ArtistService
+import com.example.podhub.Service.FavouriteService
 import com.example.podhub.Service.PodcastService
 import com.example.podhub.Service.UserService
 import okhttp3.OkHttpClient
@@ -13,7 +14,7 @@ import kotlin.jvm.java
 
 
 object RetrofitInstance {
-    private const val SECOND_URL = "http://192.168.0.100:3000"
+    private const val SECOND_URL = "http://192.168.1.5:3000"
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
@@ -35,6 +36,9 @@ object RetrofitInstance {
     }
     val podcastService: PodcastService by lazy {
         retrofit.create(PodcastService::class.java)
+    }
+    val favouriteService : FavouriteService by lazy {
+        retrofit.create(FavouriteService::class.java)
     }
 
 

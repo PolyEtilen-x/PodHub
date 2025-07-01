@@ -32,9 +32,10 @@ import com.example.podhub.utils.PodcastItemShimmer
 import com.example.podhub.viewmodels.PodcastViewModel
 import kotlinx.coroutines.launch
 import android.util.Log
+import com.example.podhub.viewmodels.FavouriteViewModel
 
 @Composable
-fun PodcastCategoryScreen(navController: NavHostController, podCastViewModel: PodcastViewModel) {
+fun PodcastCategoryScreen(navController: NavHostController, podCastViewModel: PodcastViewModel,favouriteViewModel: FavouriteViewModel) {
     var searchQuery by remember { mutableStateOf("") }
     val podcasts by podCastViewModel.podcasts.collectAsState()
     val isLoading by podCastViewModel.isLoading.collectAsState()

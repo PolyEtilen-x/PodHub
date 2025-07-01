@@ -1,12 +1,17 @@
 package com.example.podhub.ui.feature.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,23 +25,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.podhub.components.BottomNavigationBar
 import com.example.podhub.components.HomeHeader
 import com.example.podhub.models.PodcastResponseData
 import com.example.podhub.storage.DataStoreManager
 import com.example.podhub.ui.navigation.Routes
+import com.example.podhub.viewmodels.FavouriteViewModel
+import com.example.podhub.viewmodels.PodcastViewModel
+
 
 @Composable
 fun PodcastDetailScreen(
     navController: NavHostController,
-    podcast: PodcastResponseData
+    podcast: PodcastResponseData,
+    podcastViewModel: PodcastViewModel,
+    favouriteViewModel: FavouriteViewModel
 ) {
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
     val userData by dataStore.userData.collectAsState(initial = emptyMap())
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentRoute = navBackStackEntry?.destination?.route ?: ""
+    val episodes by podcastViewModel.episodes.collectAsState()
+    val isFavourite by favouriteViewModel.isFavourite.collectAsState()
+    val buttonColor = if (isFavourite) Color(0xFFFF4081) else Color.White
+    val iconColor = if (isFavourite) Color.White else Color.Gray
+    val icon = if (isFavourite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
+    LaunchedEffect(Unit) {
+        podcastViewModel.fetchEpisodesPodCast(podcast.feedUrl.toString())
+        podcast.trackId?.let { favouriteViewModel.checkIfPodcastFavourited("112233",it) }
+
+    }
+
 
     Scaffold(
         topBar = {
@@ -83,14 +105,15 @@ fun PodcastDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(podcast.channelImage),
+                    AsyncImage(
+                        model = podcast.artworkUrl100,
                         contentDescription = podcast.collectionName,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp),
-                        contentScale = ContentScale.Crop
+                            .height(200.dp)
                     )
+
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -111,11 +134,14 @@ fun PodcastDetailScreen(
 
                     Button(
                         onClick = {
-                            navController.currentBackStackEntry
-                                ?.savedStateHandle
-                                ?.set("podcast", podcast)
+                            navController.currentBackStackEntry?.savedStateHandle?.apply {
+                                set("initialEpisodeIndex", 0)
+                                set("imageUrl", podcast.artworkUrl100)
+                                set("artistName", podcast.artistName)
+                            }
                             navController.navigate(Routes.PLAYER)
-                        },
+                        }
+                        ,
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC533)),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
@@ -131,6 +157,29 @@ fun PodcastDetailScreen(
                         Text("Phát", color = Color.White)
                     }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Button(
+                        onClick = {
+
+                            podcast.trackId?.let { favouriteViewModel.toggleFavourite("112233", it) }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                            .height(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = "Add to Favorites",
+                            tint = iconColor
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Yêu thích", color = iconColor)
+                    }
+
+
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
@@ -142,19 +191,29 @@ fun PodcastDetailScreen(
                 }
             }
 
-            items(podcast.episodes ?: emptyList()) { episode ->
+            itemsIndexed(episodes) { index, episode ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val imageUrl = if (episode.image != "") episode.image else podcast.artworkUrl100
+                    Log.d("episode image",episode.image.toString())
                     Image(
-                        painter = rememberAsyncImagePainter(episode.image),
+                        painter = rememberAsyncImagePainter(imageUrl),
                         contentDescription = episode.title,
                         modifier = Modifier
                             .size(56.dp)
-                            .padding(end = 12.dp),
+                            .padding(end = 12.dp)
+                            .clickable {
+                                navController.currentBackStackEntry?.savedStateHandle?.apply {
+                                    set("initialEpisodeIndex", index)
+                                    set("imageUrl", imageUrl)
+                                    set("artistName", podcast.artistName)
+                                }
+                                navController.navigate(Routes.PLAYER)
+                            },
                         contentScale = ContentScale.Crop
                     )
                     Column {
