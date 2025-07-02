@@ -1,6 +1,7 @@
 package com.example.podhub.ui.navigation
 
 //import com.example.podhub.ui.feature.room.RoomListScreen
+import android.content.Intent
 import android.net.Uri
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,10 +30,16 @@ import com.example.podhub.viewmodels.ArtistViewModel
 import com.example.podhub.viewmodels.FavouriteViewModel
 import com.example.podhub.viewmodels.PodcastViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.example.podhub.storage.DataStoreManager
 import com.example.podhub.ui.feature.library.PlaylistDetailScreen
 import com.example.podhub.viewmodels.HistoryViewModel
 import com.example.podhub.viewmodels.ScriptViewModel
+import com.example.podhub.ui.feature.room.LiveActivity
+import com.example.podhub.ui.feature.room.RoomListScreen
 import com.example.podhub.viewmodels.SharedPlaylistViewModel
+import com.example.podhub.ui.feature.room.NewRoomScreen
 
 
 object Routes {
@@ -52,6 +59,9 @@ object Routes {
 
 @Composable
 fun AppRouter(navController: NavHostController) {
+    val context = LocalContext.current
+    val dataStore = remember { DataStoreManager(context) }
+    val userData by dataStore.userData.collectAsState(initial = emptyMap())
     val sharedPlaylistViewModel: SharedPlaylistViewModel = viewModel()
     val artistViewModel: ArtistViewModel = viewModel(factory = viewModelFactory {
         initializer {
@@ -187,9 +197,25 @@ fun AppRouter(navController: NavHostController) {
 
 
 
-//        composable(Routes.ROOM) {
-//            RoomListScreen(navController)
-//        }
-
+        composable(Routes.ROOM) {
+            RoomListScreen(navController)
+        }
+        composable("newroom") {
+            NewRoomScreen(navController)
+        }
+        composable("livestream/{roomId}") { backStackEntry ->
+            val roomId = backStackEntry.arguments?.getString("roomId")
+            roomId?.let {
+                val intent = Intent(context, LiveActivity::class.java).apply {
+                    putExtra("roomId", it)
+                    putExtra("appID", 2113018141)
+                    putExtra("userID", userData["uid"])
+                    putExtra("userName", userData["name"])
+                    putExtra("appSign", "8d0ab927091ce85df2f9a2e83e6b9676a7bef3233b60219b96695a74b7116129")
+                    putExtra("isHost", true)
+                }
+                context.startActivity(intent)
+            }
+        }
     }
 }
