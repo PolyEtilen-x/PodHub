@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -107,11 +108,18 @@ fun LoginScreen(navController: NavHostController) {
             .background(Color(0xFFFAF6F5)),
         contentAlignment = Alignment.Center
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.backgroudlogin),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(alpha = 0.5f)
+        )
         Column(
             modifier = Modifier
                 .padding(24.dp)
                 .fillMaxWidth()
-                .background(Color(0xFFF9F7F6), shape = RoundedCornerShape(32.dp))
                 .padding(horizontal = 24.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp)
@@ -145,15 +153,16 @@ fun LoginScreen(navController: NavHostController) {
                 },
                 border = BorderStroke(2.dp, Color(0xFFFFC107)),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.Transparent,
+                    containerColor = Color(0xFFFAF6F5),
                     contentColor = Color(0xFFFFC107)
                 ),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth().height(50.dp)
             ) {
-                Text(text = "Sign in with Google", fontSize = 16.sp)
+                Text(text = "Sign in with Google", fontSize = 20.sp)
             }
         }
     }
 }
+
 

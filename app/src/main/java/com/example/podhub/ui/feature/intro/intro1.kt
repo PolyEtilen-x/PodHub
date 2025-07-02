@@ -27,7 +27,6 @@ fun IntroScreen1(navController: NavHostController) {
             .width(screenWidth)
             .height(screenHeight)
     ) {
-        // Background image
         Image(
             painter = painterResource(id = R.drawable.intro_1),
             contentDescription = null,

@@ -14,11 +14,13 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
         google()
         mavenCentral()
 
-        maven ( url = "https://www.jitpack.io")
-        maven ( url = "https://jitpack.io")
+        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://storage.zego.im/maven") }
+        maven { url = uri ("https://maven.zegocloud.com/repository/zigroup/") }
     }
 }
 

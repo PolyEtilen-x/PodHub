@@ -4,8 +4,10 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 import com.cloudinary.android.MediaManager
 
+
+
 @HiltAndroidApp
-class PodhubApplication : Application(){
+class PodhubApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         val config: HashMap<String, String> = HashMap()
