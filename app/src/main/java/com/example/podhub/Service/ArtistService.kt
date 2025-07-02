@@ -16,7 +16,7 @@ interface ArtistService {
     suspend fun getPodCastByArtist(
         @Path("artistId") artistId: Int
     ): Response<List<PodcastResponseData>>
-    @GET("/favourite/{uuid}")
+    @GET("/artist/favourite/{uuid}")
     suspend fun getAllFavouriteArtist
                 (@Path("uuid") uuid: String): Response<List<Artist>>
 

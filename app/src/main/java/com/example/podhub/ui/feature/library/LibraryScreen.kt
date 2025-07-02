@@ -17,10 +17,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.podhub.R
 import com.example.podhub.components.BottomNavigationBar
+import com.example.podhub.viewmodels.ArtistViewModel
+import com.example.podhub.viewmodels.FavouriteViewModel
+import com.example.podhub.viewmodels.PodcastViewModel
 import com.example.podhub.viewmodels.SharedPlaylistViewModel
 
 @Composable
-fun LibraryScreen(navController: NavHostController,     sharedPlaylistViewModel: SharedPlaylistViewModel) {
+fun LibraryScreen(navController: NavHostController,podcastViewModel: PodcastViewModel,artistViewModel: ArtistViewModel,favouriteViewModel: FavouriteViewModel) {
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentRoute = navBackStackEntry?.destination?.route ?: ""
 
@@ -90,9 +93,9 @@ fun LibraryScreen(navController: NavHostController,     sharedPlaylistViewModel:
             }
 
             when (selectedTabIndex) {
-                0 -> LibraryPodcastsTab()
-                1 -> LibraryArtistsTab()
-                2 -> LibraryPlaylistsTab(navController, sharedPlaylistViewModel)
+                0 -> LibraryPodcastsTab(podcastViewModel,favouriteViewModel)
+                1 -> LibraryArtistsTab(artistViewModel,favouriteViewModel)
+                2 -> LibraryPlaylistsTab(navController)
 
             }
         }

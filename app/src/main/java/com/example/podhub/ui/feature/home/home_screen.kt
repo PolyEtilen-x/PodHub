@@ -1,5 +1,6 @@
 package com.example.podhub.ui.feature.home
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.*
@@ -33,10 +34,11 @@ import com.example.podhub.components.ArtistRow
 import com.example.podhub.ui.navigation.Routes
 import com.example.podhub.viewmodels.ArtistViewModel
 import com.example.podhub.viewmodels.FavouriteViewModel
+import com.example.podhub.viewmodels.HistoryViewModel
 import com.example.podhub.viewmodels.PodcastViewModel
 
 @Composable
-fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel,podcastViewModel: PodcastViewModel,favouriteViewModel: FavouriteViewModel) {
+fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel,podcastViewModel: PodcastViewModel,favouriteViewModel: FavouriteViewModel,historyViewModel: HistoryViewModel) {
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
     val userData by dataStore.userData.collectAsState(initial = emptyMap())
@@ -51,8 +53,14 @@ fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel
     val popularList = PodcastResponse.podcastList
     val artists by artistViewModel.artists.collectAsState()
     val suggestedPodcast by favouriteViewModel.suggestedPodcasts.collectAsState()
+    val historyPodcasts by historyViewModel.podcastIds.collectAsState()
+
+
     LaunchedEffect(Unit) {
-        favouriteViewModel.loadSuggestedPodcasts("112233")
+        Log.d("uuid",dataStore.getUid())
+
+        favouriteViewModel.loadSuggestedPodcasts(dataStore.getUid())
+        historyViewModel.loadHistory(dataStore.getUid())
     }
 
 
@@ -91,20 +99,32 @@ fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel
                 )
             }
 
-            val onPodcastClick: (PodcastResponseData) -> Unit = { podcast ->
+            val onPodcastClick: (PodcastResponseData, Boolean) -> Unit = { podcast, isHistory ->
+                if (isHistory) {
+                    val indexInRecent = historyPodcasts.indexOf(podcast)
+                    if (indexInRecent != -1) {
+                        historyViewModel.setSelectedIndex(indexInRecent)
+                    }
+                }
+
                 navController.currentBackStackEntry
                     ?.savedStateHandle
                     ?.set("podcast", podcast)
+
+                // Save the isHistory flag as well
+                navController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.set("isHistory", isHistory)
 
                 navController.navigate(Routes.PODCAST_DETAIL)
             }
 
             when (selectedFilter.value) {
                 FilterHome.All -> {
-                    podcastSection("Gần đây", recentPodcasts, onPodcastClick)
-                    podcastSection("Danh sách phát", yourPlaylist, onPodcastClick)
-                    podcastSection("Đề xuất", suggestedPodcast, onPodcastClick)
-                    podcastSection("Podcast phổ biến", popularList, onPodcastClick)
+                    podcastSection("Gần đây", historyPodcasts, onPodcastClick, isHistory = true)
+                    podcastSection("Danh sách phát", yourPlaylist, onPodcastClick, isHistory = false)
+                    podcastSection("Đề xuất", suggestedPodcast, onPodcastClick, isHistory = false)
+                    podcastSection("Podcast phổ biến", popularList, onPodcastClick, isHistory = false)
                     artistSection("Nghệ sĩ nổi bật", artists)
                 }
                 FilterHome.Podcasts -> {
@@ -125,7 +145,8 @@ fun HomeScreen(navController: NavHostController,artistViewModel: ArtistViewModel
 fun LazyListScope.podcastSection(
     title: String,
     list: List<PodcastResponseData>,
-    onItemClick: (PodcastResponseData) -> Unit
+    onItemClick: (PodcastResponseData, Boolean) -> Unit,
+    isHistory: Boolean = false // Default is false
 ) {
     val columnChunks = list.chunked(2)
     item {
@@ -141,7 +162,12 @@ fun LazyListScope.podcastSection(
                 contentPadding = PaddingValues(horizontal = 4.dp)
             ) {
                 items(columnChunks) { columnPodcasts ->
-                    PodcastRow(podcasts = columnPodcasts, onItemClick = onItemClick)
+                    PodcastRow(
+                        podcasts = columnPodcasts,
+                        onItemClick = { podcast ->
+                            onItemClick(podcast, isHistory)
+                        }
+                    )
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.example.podhub.ui.feature.library
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,33 +23,28 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.podhub.data.PodcastResponse
 import com.example.podhub.models.PodcastResponseData
+import com.example.podhub.storage.DataStoreManager
+import com.example.podhub.viewmodels.FavouriteViewModel
 import com.example.podhub.viewmodels.LibraryViewModel
+import com.example.podhub.viewmodels.PodcastViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun LibraryPodcastsTab(
-    libraryViewModel: LibraryViewModel = viewModel()
+    podcastViewModel: PodcastViewModel,
+    favouriteViewModel: FavouriteViewModel
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val dataStore = remember { DataStoreManager(context) }
 
-    val loaded = remember { mutableStateOf(false) }
-    if (!loaded.value) {
-        libraryViewModel.loadInitialPodcasts(PodcastResponse.podcastList.orEmpty())
-        loaded.value = true
+    val podcastList by podcastViewModel.favouritePodcasts.collectAsState()
+    LaunchedEffect(Unit) {
+        podcastViewModel.fetchFavouritePodCast(dataStore.getUid())
     }
 
-    val podcastList by libraryViewModel.podcasts.collectAsState()
-    var deletedPodcastName by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(deletedPodcastName) {
-        deletedPodcastName?.let {
-            snackbarHostState.showSnackbar(
-                message = "Đã xóa podcast: $it",
-                withDismissAction = true
-            )
-            deletedPodcastName = null
-        }
-    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -60,10 +58,14 @@ fun LibraryPodcastsTab(
                 .padding(horizontal = 16.dp)
         ) {
             items(podcastList) { podcast ->
-                PodcastLibraryItem(podcast) {
-                    libraryViewModel.removePodcast(podcast)
-                    deletedPodcastName = podcast.trackName
-                }
+                PodcastLibraryItem(podcast, onDeleteClick = {
+                    podcast.trackId?.let { trackId ->
+                        scope.launch {
+                            favouriteViewModel.toggleFavourite("332211", trackId)
+                            podcastViewModel.fetchFavouritePodCast("332211")
+                        }
+                    }
+                })
             }
         }
     }
@@ -80,40 +82,52 @@ fun PodcastLibraryItem(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, shape = RoundedCornerShape(12.dp))
-            .clickable { /* điều hướng hoặc phát */ }
-            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .clickable { /* Navigate or play */ }
+            .padding(horizontal = 8.dp, vertical = 10.dp)
     ) {
         Image(
-            painter = rememberAsyncImagePainter(podcast.channelImage),
+            painter = rememberAsyncImagePainter(podcast.artworkUrl100),
             contentDescription = "Podcast Image",
             modifier = Modifier
-                .size(48.dp)
-                .padding(end = 8.dp),
+                .size(56.dp)
+                .padding(end = 12.dp),
             contentScale = ContentScale.Crop
         )
 
-        Text(
-            text = podcast.trackName.orEmpty(),
-            fontSize = 14.sp,
-            color = Color.Black,
+        Column(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 8.dp)
-        )
-
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = Color(0xFFFFC533),
-            modifier = Modifier
-                .defaultMinSize(minHeight = 32.dp)
-                .clickable { onDeleteClick() }
         ) {
             Text(
-                text = "Xóa",
-                color = Color.White,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                text = podcast.trackName.orEmpty(),
+                fontSize = 15.sp,
+                color = Color.Black,
+                maxLines = 2
             )
+            Text(
+                text = podcast.artistName ?: "",
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
+        }
+
+        OutlinedButton(
+            onClick = onDeleteClick,
+            border = BorderStroke(1.dp, Color.Red),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+            shape = RoundedCornerShape(50),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+            modifier = Modifier.height(36.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                tint = Color.Red,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Xóa", fontSize = 12.sp)
         }
     }
 }

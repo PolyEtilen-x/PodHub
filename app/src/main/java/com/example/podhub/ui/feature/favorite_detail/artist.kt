@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 import android.util.Log
 import androidx.compose.ui.Alignment
+import com.example.podhub.storage.DataStoreManager
 import com.example.podhub.viewmodels.FavouriteViewModel
 
 @Composable
@@ -38,8 +39,9 @@ fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: Art
     val context = LocalContext.current
     val artists by artistViewModel.artists.collectAsState()
     val isLoading by artistViewModel.isLoading.collectAsState()
-    val selectedArtists = remember { mutableStateListOf<String>() }
+    val selectedArtists = remember { mutableStateListOf<Long>() }
     val coroutineScope = rememberCoroutineScope()
+    val dataStore = remember { DataStoreManager(context) }
 
 
     Column(
@@ -98,14 +100,14 @@ fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: Art
             } else {
                 // Show actual artist items
                 items(artists) { artist ->
-                    val isSelected = selectedArtists.contains(artist.name)
+                    val isSelected = selectedArtists.contains(artist.artistId.toLong())
                     ArtistItem(
                         name = artist.name,
                         imageUrl = artist.avatar,
                         isSelected = isSelected,
                         onClick = {
                             if (!isSelected) {
-                                selectedArtists.add(artist.name)
+                                selectedArtists.add(artist.artistId.toLong())
                             }
                         }
                     )
@@ -128,7 +130,7 @@ fun ArtistSelectionScreen(navController: NavHostController, artistViewModel: Art
         Button(
             onClick = {
                 coroutineScope.launch {
-                    SelectedArtistStore.saveSelectedArtists(context, selectedArtists.toSet())
+                    favouriteViewModel.collectFavourite(dataStore.getUid(),selectedArtists,emptyList<Long>())
                     navController.navigate(Routes.FAVORITE_PODCAST)
                     Log.d("selectedArtists", selectedArtists.toString())
                 }

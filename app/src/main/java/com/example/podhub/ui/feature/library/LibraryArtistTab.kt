@@ -1,5 +1,6 @@
 package com.example.podhub.ui.feature.library
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
@@ -20,31 +22,26 @@ import com.example.podhub.R
 import com.example.podhub.models.Artist
 import com.example.podhub.viewmodels.ArtistViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.podhub.storage.DataStoreManager
+import com.example.podhub.viewmodels.FavouriteViewModel
 
 @Composable
 fun LibraryArtistsTab(
-    artistViewModel: ArtistViewModel = viewModel()
+    artistViewModel: ArtistViewModel,
+    favouriteViewModel: FavouriteViewModel
 ) {
-    val allArtists by artistViewModel.artists.collectAsState()
+    val allArtists by artistViewModel.FavourtiteArtists.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var localArtists by remember { mutableStateOf(allArtists) }
+    val context = LocalContext.current
+    val dataStore = remember { DataStoreManager(context) }
 
-    var deletedArtist by remember { mutableStateOf<Artist?>(null) }
 
-    LaunchedEffect(allArtists) {
-        localArtists = allArtists
+    LaunchedEffect(Unit) {
+        artistViewModel.fetchFavouriteArtist(dataStore.getUid())
+        Log.d("artists",allArtists.toString())
     }
 
-    LaunchedEffect(deletedArtist) {
-        deletedArtist?.let {
-            snackbarHostState.showSnackbar(
-                message = "Đã xóa nghệ sĩ: ${it.name}",
-                withDismissAction = true
-            )
-            deletedArtist = null
-        }
-    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -56,11 +53,8 @@ fun LibraryArtistsTab(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            items(localArtists) { artist ->
-                ArtistLibraryItem(artist = artist) {
-                    localArtists = localArtists.filterNot { it.artistId  == artist.artistId }
-                    deletedArtist = artist
-                }
+            items(allArtists) { artist ->
+                ArtistLibraryItem(artist = artist, onDeleteClick = {})
             }
         }
     }

@@ -2,7 +2,9 @@ package com.example.podhub.Retrofit
 
 import com.example.podhub.Service.ArtistService
 import com.example.podhub.Service.FavouriteService
+import com.example.podhub.Service.HistoryService
 import com.example.podhub.Service.PodcastService
+import com.example.podhub.Service.ScriptService
 import com.example.podhub.Service.UserService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -39,6 +41,12 @@ object RetrofitInstance {
     }
     val favouriteService : FavouriteService by lazy {
         retrofit.create(FavouriteService::class.java)
+    }
+    val historyService : HistoryService by lazy {
+        retrofit.create(HistoryService::class.java)
+    }
+    val scriptService : ScriptService by lazy {
+        retrofit.create(ScriptService::class.java)
     }
 
 

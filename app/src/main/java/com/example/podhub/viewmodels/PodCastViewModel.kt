@@ -16,11 +16,18 @@ class PodcastViewModel : ViewModel() {
     private val _categoryPodcasts = MutableStateFlow<List<PodcastResponseData>>(emptyList())
     val categoryPodcasts: StateFlow<List<PodcastResponseData>> = _categoryPodcasts
 
+    private val _favouritePodcasts = MutableStateFlow<List<PodcastResponseData>>(emptyList())
+    val favouritePodcasts: StateFlow<List<PodcastResponseData>> = _favouritePodcasts
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _episodes = MutableStateFlow<List<Episode>>(emptyList())
     val episodes: MutableStateFlow<List<Episode>> = _episodes
+    private val _searchResults = MutableStateFlow<List<PodcastResponseData>>(emptyList())
+    val searchResults: StateFlow<List<PodcastResponseData>> = _searchResults
+
+
 
     fun fetchPodcasts(term: String = "comedy", limit: Int = 20) {
         viewModelScope.launch {
@@ -75,4 +82,40 @@ class PodcastViewModel : ViewModel() {
             }
         }
     }
+
+    fun fetchFavouritePodCast (uuid : String){
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.podcastService.getAllFavouritePodCast(uuid)
+                if (response.isSuccessful) {
+                    _favouritePodcasts.value = response.body() ?: emptyList()
+                } else {
+                    Log.e("PodcastVM", "Failed: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("PodcastVM", "Exception: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+    fun searchPodcasts(term: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = RetrofitInstance.podcastService.searchPodcasts(term)
+                if (response.isSuccessful) {
+                    _searchResults.value = response.body() ?: emptyList()
+                } else {
+                    Log.e("PodcastVM", "Search failed: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("PodcastVM", "Search exception: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
 }

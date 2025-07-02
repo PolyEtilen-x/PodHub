@@ -34,7 +34,7 @@ import com.example.podhub.viewmodels.SharedPlaylistViewModel
 
 
 @Composable
-fun LibraryPlaylistsTab(navController: NavHostController, sharedPlaylistViewModel: SharedPlaylistViewModel) {
+fun LibraryPlaylistsTab(navController: NavHostController) {
     val playlists = remember {
         mutableStateListOf(
             Playlist("grainy days", 10, null),
@@ -100,7 +100,7 @@ fun LibraryPlaylistsTab(navController: NavHostController, sharedPlaylistViewMode
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            sharedPlaylistViewModel.selectedPlaylist = playlist
+                            //sharedPlaylistViewModel.selectedPlaylist = playlist
                             navController.navigate("playlist_detail")
                         }
 

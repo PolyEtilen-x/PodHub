@@ -30,6 +30,8 @@ import com.example.podhub.viewmodels.FavouriteViewModel
 import com.example.podhub.viewmodels.PodcastViewModel
 import androidx.compose.runtime.getValue
 import com.example.podhub.ui.feature.library.PlaylistDetailScreen
+import com.example.podhub.viewmodels.HistoryViewModel
+import com.example.podhub.viewmodels.ScriptViewModel
 import com.example.podhub.viewmodels.SharedPlaylistViewModel
 
 
@@ -67,10 +69,21 @@ fun AppRouter(navController: NavHostController) {
             FavouriteViewModel()
         }
     })
+    val historyViewModel : HistoryViewModel = viewModel (factory = viewModelFactory {
+        initializer {
+            HistoryViewModel()
+        }
+    })
+    val scriptViewModel : ScriptViewModel = viewModel (factory = viewModelFactory {
+        initializer {
+            ScriptViewModel()
+        }
+    })
 
     LaunchedEffect(Unit) {
         podCastViewModel.fetchPodcasts("comedy",10)
         artistViewModel.fetchAllArtists()
+        scriptViewModel.fetchScriptByPodcastId(1222114325)
     }
 
     NavHost(navController = navController, startDestination = Routes.INTRO1) {
@@ -98,7 +111,7 @@ fun AppRouter(navController: NavHostController) {
         }
 
         composable(Routes.HOME) {
-            HomeScreen(navController,artistViewModel,podCastViewModel,favouriteViewModel)
+            HomeScreen(navController,artistViewModel,podCastViewModel,favouriteViewModel,historyViewModel)
         }
 
         composable("genre/{genreName}") { backStackEntry ->
@@ -115,32 +128,55 @@ fun AppRouter(navController: NavHostController) {
                 .previousBackStackEntry
                 ?.savedStateHandle
                 ?.get<PodcastResponseData>("podcast")
+
+            val isHistory = navController
+                .previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Boolean>("isHistory") ?: false // Default to false if not found
+
             if (podcast != null) {
-                PodcastDetailScreen(navController, podcast,podCastViewModel,favouriteViewModel)
+                PodcastDetailScreen(
+                    navController = navController,
+                    podcast = podcast,
+                    podCastViewModel,
+                    favouriteViewModel = favouriteViewModel,
+                    isHistory = isHistory,
+                    historyViewModel
+                )
             }
         }
         composable(Routes.PLAYER) {
             val savedStateHandle = navController.previousBackStackEntry?.savedStateHandle
 
+
+            val recentPlay = savedStateHandle?.get<Int>("recentPlay")
             val initialEpisodeIndex = savedStateHandle?.get<Int>("initialEpisodeIndex") ?: 0
             val imageUrl = savedStateHandle?.get<String>("imageUrl") ?: ""
             val artistName = savedStateHandle?.get<String>("artistName") ?: ""
+            val podCastId = savedStateHandle?.get<Long>("podCastId") ?: ""
 
-            PlayerScreen(
-                navController = navController,
-                podcastViewModel = podCastViewModel,
-                initialEpisodeIndex = initialEpisodeIndex,
-                imageUrl = imageUrl,
-                artistName = artistName
-            )
+            if (recentPlay != null) {
+                PlayerScreen(
+                    navController = navController,
+                    podcastViewModel = podCastViewModel,
+                    historyViewModel = historyViewModel,
+                    scriptViewModel,
+                    initialEpisodeIndex = initialEpisodeIndex,
+
+                    recentPlay = recentPlay,
+                    imageUrl = imageUrl,
+                    artistName = artistName,
+                    podCastId = podCastId
+                )
+            }
         }
 
 
         composable(Routes.SEARCH) {
-            SearchScreen(navController)
+            SearchScreen(navController,podCastViewModel)
         }
         composable(Routes.LIBRARY) {
-            LibraryScreen(navController, sharedPlaylistViewModel)
+            LibraryScreen(navController,podCastViewModel,artistViewModel,favouriteViewModel)
         }
 
         composable("playlist_detail") {
