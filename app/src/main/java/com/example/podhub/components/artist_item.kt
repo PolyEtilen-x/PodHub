@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.podhub.R
 import com.example.podhub.models.Artist
 import kotlin.collections.forEach
@@ -60,7 +61,9 @@ fun ArtistItem(
         )
         Text(
             text = name,
+            maxLines = 1,
             fontSize = 14.sp,
+            overflow = TextOverflow.Ellipsis,
             color = Color.Black
         )
     }

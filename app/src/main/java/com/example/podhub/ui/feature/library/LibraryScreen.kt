@@ -93,10 +93,9 @@ fun LibraryScreen(navController: NavHostController,podcastViewModel: PodcastView
             }
 
             when (selectedTabIndex) {
-                0 -> LibraryPodcastsTab(podcastViewModel,favouriteViewModel)
+                0 -> LibraryPodcastsTab(podcastViewModel,favouriteViewModel, navController)
                 1 -> LibraryArtistsTab(artistViewModel,favouriteViewModel)
                 2 -> LibraryPlaylistsTab(navController)
-
             }
         }
     }

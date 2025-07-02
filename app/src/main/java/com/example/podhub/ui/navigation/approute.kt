@@ -91,7 +91,7 @@ fun AppRouter(navController: NavHostController) {
     })
 
     LaunchedEffect(Unit) {
-        podCastViewModel.fetchPodcasts("comedy",10)
+        podCastViewModel.fetchPodcasts("comedy",30)
         artistViewModel.fetchAllArtists()
         scriptViewModel.fetchScriptByPodcastId(1222114325)
     }

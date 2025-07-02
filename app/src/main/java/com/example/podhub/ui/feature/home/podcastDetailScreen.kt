@@ -40,6 +40,8 @@ import com.example.podhub.ui.navigation.Routes
 import com.example.podhub.viewmodels.FavouriteViewModel
 import com.example.podhub.viewmodels.HistoryViewModel
 import com.example.podhub.viewmodels.PodcastViewModel
+import kotlinx.coroutines.launch
+import kotlin.uuid.Uuid
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -67,6 +69,7 @@ fun PodcastDetailScreen(
     var episodeIndex by remember { mutableStateOf<Int?>(null) }
     var recentPlayedSeconds by remember { mutableStateOf<Int?>(null) }
     val isLoading by podcastViewModel.isLoading.collectAsState()
+    val scope = rememberCoroutineScope()
 
     fun formatDurationFromMillis(milliseconds: Int): String {
         val totalSeconds = milliseconds / 1000
@@ -90,10 +93,7 @@ fun PodcastDetailScreen(
     }
     LaunchedEffect(Unit) {
         podcastViewModel.fetchEpisodesPodCast(podcast.feedUrl.toString())
-        podcast.trackId?.let { favouriteViewModel.checkIfPodcastFavourited("332211",it) }
-
-
-
+        podcast.trackId?.let { favouriteViewModel.checkIfPodcastFavourited(dataStore.getUid(),it) }
     }
     LaunchedEffect(navController.currentBackStackEntry?.savedStateHandle?.get<Boolean>("dismissHistoryDialog")) {
         val dismissed = navController.currentBackStackEntry
@@ -168,25 +168,28 @@ fun PodcastDetailScreen(
                         .padding(start = 8.dp)
                 ) {
                     IconButton(onClick = {
+                        scope.launch {
+                            if (historyViewModel.getlastIndex() != null && historyViewModel.getRecentPlay() !=null && isHistory==false){
+                                Log.d("tracker lastindex",historyViewModel.getlastIndex().toString())
+                                Log.d("track123132",  dataStore.getUid())
+                                Log.d("tracker recent",  HistoryRequest(
+                                    podcast.trackId!!,
+                                    historyViewModel.getRecentPlay()!!,
+                                    historyViewModel.getlastIndex()!!
+                                ).toString())
+                                historyViewModel.postHistory(dataStore.getUid(),
+                                    HistoryRequest(
+                                        podcast.trackId!!,
+                                        historyViewModel.getRecentPlay()!!,
+                                        historyViewModel.getlastIndex()!!
+                                    )
+                                )
+                            }
+                            historyViewModel.clear()
+                            navController.popBackStack()
+                        }
 
-                        if (historyViewModel.getlastIndex() != null && historyViewModel.getRecentPlay() !=null && isHistory==false){
-                            Log.d("tracker lastindex",historyViewModel.getlastIndex().toString())
-                            Log.d("tracker recent",  HistoryRequest(
-                                podcast.trackId!!,
-                                historyViewModel.getRecentPlay()!!,
-                                historyViewModel.getlastIndex()!!
-                            ).toString())
-                        historyViewModel.postHistory(
-                            "1111",
-                            HistoryRequest(
-                                podcast.trackId!!,
-                                historyViewModel.getRecentPlay()!!,
-                                historyViewModel.getlastIndex()!!
-                            )
-                        )}
-                        historyViewModel.clear()
-
-                        navController.popBackStack() }) {
+                         }) {
                         Icon(
                             tint = Color(0xFFFFC533),
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -275,9 +278,11 @@ fun PodcastDetailScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Button(
-                        onClick = {
 
-                            podcast.trackId?.let { favouriteViewModel.toggleFavourite("332211", it) }
+                        onClick = {
+                            scope.launch {
+                                podcast.trackId?.let { favouriteViewModel.toggleFavourite(dataStore.getUid(), it) }
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                         shape = RoundedCornerShape(10.dp),

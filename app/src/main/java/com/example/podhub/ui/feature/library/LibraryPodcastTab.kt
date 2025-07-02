@@ -1,5 +1,6 @@
 package com.example.podhub.ui.feature.library
 
+import android.R.attr.onClick
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,10 +21,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.podhub.data.PodcastResponse
 import com.example.podhub.models.PodcastResponseData
 import com.example.podhub.storage.DataStoreManager
+import com.example.podhub.ui.navigation.Routes
 import com.example.podhub.viewmodels.FavouriteViewModel
 import com.example.podhub.viewmodels.LibraryViewModel
 import com.example.podhub.viewmodels.PodcastViewModel
@@ -32,9 +36,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun LibraryPodcastsTab(
     podcastViewModel: PodcastViewModel,
-    favouriteViewModel: FavouriteViewModel
+    favouriteViewModel: FavouriteViewModel,
+    navController: NavHostController
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val isLoading by favouriteViewModel.isLoading.collectAsState()
+
+
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val dataStore = remember { DataStoreManager(context) }
@@ -44,7 +52,9 @@ fun LibraryPodcastsTab(
         podcastViewModel.fetchFavouritePodCast(dataStore.getUid())
     }
 
-
+    LaunchedEffect(isLoading) {
+        podcastViewModel.fetchFavouritePodCast(dataStore.getUid())
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -61,11 +71,12 @@ fun LibraryPodcastsTab(
                 PodcastLibraryItem(podcast, onDeleteClick = {
                     podcast.trackId?.let { trackId ->
                         scope.launch {
-                            favouriteViewModel.toggleFavourite("332211", trackId)
-                            podcastViewModel.fetchFavouritePodCast("332211")
+                            favouriteViewModel.toggleFavourite(dataStore.getUid(), trackId)
+                            podcastViewModel.fetchFavouritePodCast(dataStore.getUid())
                         }
                     }
-                })
+                }, navController
+                )
             }
         }
     }
@@ -75,14 +86,22 @@ fun LibraryPodcastsTab(
 @Composable
 fun PodcastLibraryItem(
     podcast: PodcastResponseData,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    navController: NavHostController,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, shape = RoundedCornerShape(12.dp))
-            .clickable { /* Navigate or play */ }
+            .clickable {
+                navController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.set("podcast", podcast)
+
+
+                navController.navigate(Routes.PODCAST_DETAIL)
+            }
             .padding(horizontal = 8.dp, vertical = 10.dp)
     ) {
         Image(

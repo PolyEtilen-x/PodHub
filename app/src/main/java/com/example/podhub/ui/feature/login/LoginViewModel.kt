@@ -25,11 +25,13 @@ class LoginViewModel(private val dataStoreManager: DataStoreManager) : ViewModel
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
-           Log.d("uuid",uuid)
+           Log.d("HongTonLog",uuid)
 
             try {
+                Log.d("login123",Login(uuid).toString())
                 val response = RetrofitInstance.userService.loginUser(LoginRequest = Login(uuid))
                 if (response.isSuccessful) {
+                    Log.d("cahayj",loginMessage.toString())
                     _loginMessage.value = response.body()?.message!!
                     Log.d("login",loginMessage.toString())
                 } else {

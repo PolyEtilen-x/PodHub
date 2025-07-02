@@ -13,8 +13,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.getValue
 import kotlin.jvm.java
 
-
-
 object RetrofitInstance {
     private const val SECOND_URL = "http://192.168.0.100:3000"
 

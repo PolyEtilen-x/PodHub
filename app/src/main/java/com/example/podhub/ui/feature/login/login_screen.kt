@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import kotlinx.coroutines.delay
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
@@ -63,8 +64,10 @@ fun LoginScreen(navController: NavHostController) {
             val photoUrl = user.photoUrl?.toString() ?: ""
 
             scope.launch {
+                Log.d("uidHongTon", uid.toString())
                 dataStore.saveUser(uid, name, email, photoUrl)
-                loginViewModel.login(uuid = uid)
+                loginViewModel.login(uuid = dataStore.getUid())
+                delay(500)
                 if (isLogin!!){
                     navController.navigate(Routes.FAVORITE_ARTIST)
                 }else
@@ -77,7 +80,7 @@ fun LoginScreen(navController: NavHostController) {
     val activityResultHandler: (ActivityResult) -> Unit = rememberUpdatedState(newValue = { result: ActivityResult ->
         if (pendingLogin && (result.resultCode == RESULT_OK || result.resultCode == RESULT_CANCELED)) {
             pendingLogin = false
-            relaunchSignIn = true  // Trigger sign-in retry
+            relaunchSignIn = true
         }
     }).value
 
